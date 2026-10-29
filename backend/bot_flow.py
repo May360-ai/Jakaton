@@ -180,7 +180,7 @@ def route(chat, text, courses, action=None):
         elif root == 'schedule':
             result['text'] = f"{title}\n\nDuración: {course.get('duracion') or 'Por confirmar'}\nEstado: {course.get('estado') or 'Por confirmar'}\nModalidad: {details.get('modalidad', 'Por confirmar')}\nFechas del curso: {details.get('course_start', 'Por confirmar')} al {details.get('course_end', 'Por confirmar')}\n\nHorario: {details.get('horario', 'Consultar con el asesor')}\n\nLugar: {details.get('lugar', 'Por confirmar')}" + note
         elif root == 'requirements':
-            result['text'] = title + '\n\n' + details.get('requisitos', 'Requisitos: por confirmar.') + '\n\nMateriales: ' + ', '.join(details.get('materiales', [])) + '\n\n' + details.get('certificado', 'Certificado: por confirmar.') + note
+            result['text'] = title + '\n\nConocimientos previos:\n' + details.get('requisitos', 'No especificados en la ficha oficial. Consulta al centro antes de inscribirte.') + '\n\nMateriales y equipos:\n' + ('\n'.join('• ' + item for item in details.get('materiales', [])) or 'No especificados en la ficha oficial.') + '\n\nCertificado:\n' + details.get('certificado', 'No especificado en la ficha oficial.') + note
         elif root == 'enroll':
             result['state'] = 'caliente'
             link = details.get('registration_url') or course.get('enlace') or ''

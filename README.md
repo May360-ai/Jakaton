@@ -1,5 +1,7 @@
 # FISEI · Centro de atención
 
+El frontend comprueba `/api/session` antes de dibujar el dashboard o abrir SSE. Las rutas de datos y acciones devuelven 401 sin sesión cuando está configurada la contraseña. El HTML del panel y las respuestas API llevan `Cache-Control: no-store, private`. Cerrar sesión elimina la cookie de acceso y limpia los datos del frontend. Las dos fichas antiguas de Python no publican conocimientos previos: el catálogo distingue esa ausencia de un requisito explícitamente indicado como «Ninguno», y muestra materiales y certificado por separado.
+
 ## Bot con botones y catálogo real
 
 El catálogo completo contiene 18 fichas reales enlazadas desde `course.php` e `index.php`. Para actualizarlo: `python -m database.import_catalog`. El importador conserva IDs, no duplica los enlaces existentes y guarda la extracción en `database/catalog.json`. Si el servidor público de la universidad continúa entregando una cadena TLS incompleta, se puede usar `--allow-unverified-source-tls` únicamente para esa fuente; la conexión de Supabase siempre verifica TLS. Los datos ausentes quedan por confirmar. Las fechas publicadas determinan si la inscripción está finalizada, es próxima o está abierta; el enlace a un formulario no se interpreta por sí solo como inscripción vigente.

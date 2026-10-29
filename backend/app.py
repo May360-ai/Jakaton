@@ -182,6 +182,22 @@ def create_app(store=None):
         app.logger.warning('Operación fallida: %s', type(error).__name__)
         return jsonify(error='La operación no se completó. Revisa la conexión e inténtalo de nuevo.'), 502
 
+    @app.after_request
+    def prevent_dashboard_cache(response):
+        if request.path.startswith('/api/') or request.path in ['/', '/index.html']:
+            response.headers['Cache-Control'] = 'no-store, private'
+            response.headers['Pragma'] = 'no-cache'
+        return response
+
+    @app.get('/api/session')
+    def session_status():
+        return jsonify(authenticated=True)
+
+    @app.post('/api/logout')
+    def logout():
+        session.clear()
+        return jsonify(ok=True)
+
     @app.get('/api/health')
     def health():
         return jsonify(ok=True, storage='supabase' if db.remote else 'sqlite', llm=bool(os.getenv('GEMINI_API_KEY') or os.getenv('LLM_API_KEY') or os.getenv('OPENAI_API_KEY')), telegram=bool(os.getenv('TELEGRAM_BOT_TOKEN')), protected=bool(os.getenv('DASHBOARD_PASSWORD')))
@@ -189,7 +205,7 @@ def create_app(store=None):
     @app.post('/api/login')
     def login():
         supplied = str((request.get_json(silent=True) or {}).get('password', ''))
-        if not hmac.compare_digest(supplied, os.getenv('DASHBOARD_PASSWORD', '')):
+        if not hmac.compare_digest(supplied.encode(), os.getenv('DASHBOARD_PASSWORD', '').encode()):
             time.sleep(0.3)
             return jsonify(error='Contraseña incorrecta'), 401
         session['operator'] = True

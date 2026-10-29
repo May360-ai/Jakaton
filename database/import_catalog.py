@@ -62,12 +62,16 @@ def parse_course(html, url, today):
                'objetivos': items('.objetivos li'), 'precios': []}
     for target, names in {
         'horario': ('horario', 'horarios'), 'modalidad': ('modalidad',), 'lugar': ('lugar del evento',),
-        'cupo': ('cupo de inscripciones', 'el cupo de inscripciones'), 'requisitos': ('conocimientos previos',),
+        'cupo': ('cupo de inscripciones', 'el cupo de inscripciones'), 'requisitos': ('conocimientos previos', 'requisitos', 'prerrequisitos', 'requisitos previos'),
         'certificado': ('tipo de capacitacion',),
     }.items():
         value = field(*names)
         if value:
             details[target] = value
+    details['requisitos_estado'] = 'publicado' if details.get('requisitos') else 'no_especificado'
+    if not details.get('requisitos'):
+        details['requisitos'] = 'La ficha oficial no especifica conocimientos previos. Esto no equivale a confirmar que no existan requisitos.'
+    details['materiales'] = [re.sub(r'^[•·\s]+', '', item) for item in details['materiales']]
     if panel:
         for li in panel.select('li'):
             value = li.get_text(' ', strip=True)

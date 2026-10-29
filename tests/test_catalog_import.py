@@ -5,6 +5,11 @@ from backend.bot_flow import route
 
 
 class CatalogImportTests(unittest.TestCase):
+    def test_missing_requirements_are_not_invented(self):
+        course = parse_course('<h1 class="tituloCurso">Python</h1>', 'https://example.edu/course.php', '2026-10-29')
+        self.assertEqual(course['details']['requisitos_estado'], 'no_especificado')
+        self.assertIn('no especifica', course['details']['requisitos'])
+
     def test_shared_year_dates(self):
         self.assertEqual(dates('15 de febrero al 02 de marzo de 2025'), ['2025-02-15', '2025-03-02'])
         self.assertEqual(dates('Del 01 al 15 de octubre de 2026'), ['2026-10-01', '2026-10-15'])

@@ -7,6 +7,7 @@
     "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso1.php",
     "is_demo": false,
     "details": {
+      "cupo": "Ilimitado",
       "lugar": "Virtual a través de la plataforma CISCO.",
       "horario": "A elección del participante",
       "modulos": [
@@ -41,12 +42,14 @@
         "Implementar funciones y trabajar con módulos para estructurar código reutilizable y organizar proyectos de forma profesional.",
         "Prepararse para el uso de Python en contextos prácticos explorando aplicaciones básicas en áreas como el análisis de datos y la automatización de procesos."
       ],
+      "course_end": "2025-03-30",
       "materiales": [
-        "• Computador personal",
-        "• Conexión a internet"
+        "Computador personal",
+        "Conexión a internet"
       ],
       "source_url": "https://ctt-talleresfisei.uta.edu.ec/curso1.php",
       "certificado": "Certificado digital de asistencia y aprobación.",
+      "course_start": "2025-03-01",
       "source_fields": {
         "fechas de inscripciones": "15 de febrero al 02 de marzo de 2025",
         "el cupo de inscripciones": "Ilimitado",
@@ -59,15 +62,14 @@
         "beneficiarios": "Estudiantes, graduados, docentes y público en general",
         "modalidad": "Virtual auto-didacta (Self-paced)"
       },
+      "registration_end": "2025-03-02",
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "Del 01 de marzo al 30 de marzo de 2025",
       "source_checked_on": "2026-10-29",
-      "registration_dates_text": "15 de febrero al 02 de marzo de 2025",
-      "cupo": "Ilimitado",
       "registration_start": "2025-02-15",
-      "registration_end": "2025-03-02",
-      "course_start": "2025-03-01",
-      "course_end": "2025-03-30"
+      "registration_dates_text": "15 de febrero al 02 de marzo de 2025",
+      "requisitos_estado": "no_especificado",
+      "requisitos": "La ficha oficial no especifica conocimientos previos. Esto no equivale a confirmar que no existan requisitos."
     }
   },
   {
@@ -78,6 +80,7 @@
     "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso2.php",
     "is_demo": false,
     "details": {
+      "cupo": "Ilimitado",
       "lugar": "Virtual a través de la plataforma CISCO.",
       "horario": "A elección del participante",
       "modulos": [
@@ -106,12 +109,14 @@
         "Manejar y procesar archivos en diferentes formatos para la lectura, escritura y\n            manipulación de datos persistentes en aplicaciones.",
         "Explorar el uso de bibliotecas estándar y externas de Python para ampliar la\n            funcionalidad de los programas y trabajar con tareas específicas como\n            manejo de fechas, cálculos matemáticos y acceso a internet.."
       ],
+      "course_end": "2025-05-04",
       "materiales": [
-        "• Computador personal.",
-        "• Conexión a internet."
+        "Computador personal.",
+        "Conexión a internet."
       ],
       "source_url": "https://ctt-talleresfisei.uta.edu.ec/curso2.php",
       "certificado": "Certificado digital de asistencia y aprobación con validación QR.",
+      "course_start": "2025-04-05",
       "source_fields": {
         "fechas de inscripciones": "Del 15 de marzo al 07 de abril de 2025.",
         "el cupo de inscripciones": "Ilimitado",
@@ -124,15 +129,14 @@
         "beneficiarios": "Estudiantes, graduados, docentes y público en general",
         "modalidad": "Curso virtual auto-didacta (Self-paced)"
       },
+      "registration_end": "2025-04-07",
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "Del 05 de abril al 04 de mayo del 2025",
       "source_checked_on": "2026-10-29",
-      "registration_dates_text": "Del 15 de marzo al 07 de abril de 2025.",
-      "cupo": "Ilimitado",
       "registration_start": "2025-03-15",
-      "registration_end": "2025-04-07",
-      "course_start": "2025-04-05",
-      "course_end": "2025-05-04"
+      "registration_dates_text": "Del 15 de marzo al 07 de abril de 2025.",
+      "requisitos_estado": "no_especificado",
+      "requisitos": "La ficha oficial no especifica conocimientos previos. Esto no equivale a confirmar que no existan requisitos."
     }
   },
   {
@@ -176,8 +180,8 @@
         "Integrar JavaScript en aplicaciones web, entender su interacción con HTML y\nCSS, y explorar su uso en aplicaciones del lado cliente."
       ],
       "materiales": [
-        "• Computador personal.",
-        "• Conexión a internet."
+        "Computador personal.",
+        "Conexión a internet."
       ],
       "requisitos": "Ninguno",
       "source_url": "https://ctt-talleresfisei.uta.edu.ec/curso3.php",
@@ -190,12 +194,13 @@
         "modalidad": "Virtual - eLearning",
         "conocimientos previos": "Ninguno"
       },
+      "registration_end": "2025-03-03",
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "01-marzo a 31-marzo-2025.",
       "source_checked_on": "2026-10-29",
-      "registration_dates_text": "Del 17 de febrero al 03 de marzo de 2025.",
       "registration_start": "2025-02-17",
-      "registration_end": "2025-03-03"
+      "registration_dates_text": "Del 17 de febrero al 03 de marzo de 2025.",
+      "requisitos_estado": "publicado"
     }
   },
   {
@@ -237,8 +242,8 @@
         "Desarrollar habilidades analíticas y prácticas en resolución de problemas\naplicando conceptos de JavaScript en proyectos prácticos para construir un\nportafolio competitivo"
       ],
       "materiales": [
-        "• Computador personal.",
-        "• Conexión a internet."
+        "Computador personal.",
+        "Conexión a internet."
       ],
       "requisitos": "JavaScript.",
       "source_url": "https://ctt-talleresfisei.uta.edu.ec/curso4.php",
@@ -253,7 +258,8 @@
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "05-abril a 04-mayo-2025",
       "source_checked_on": "2026-10-29",
-      "registration_dates_text": ""
+      "registration_dates_text": "",
+      "requisitos_estado": "publicado"
     }
   },
   {
@@ -294,8 +300,8 @@
         "Obtener datos apropiados para el análisis estadístico de los datos."
       ],
       "materiales": [
-        "• Computador personal.",
-        "• Conexión a internet."
+        "Computador personal.",
+        "Conexión a internet."
       ],
       "requisitos": "Nivel de inglés básico.",
       "source_url": "https://ctt-talleresfisei.uta.edu.ec/curso5.php",
@@ -311,7 +317,8 @@
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "01-marzo a 30-marzo-2025",
       "source_checked_on": "2026-10-29",
-      "registration_dates_text": ""
+      "registration_dates_text": "",
+      "requisitos_estado": "publicado"
     }
   },
   {
@@ -358,7 +365,7 @@
         "Adquirir las habilidades necesarias para implementar seguridad y monitorear,\nanalizar y y responder a las amenazas de seguridad actuales"
       ],
       "materiales": [
-        "• Computador personal. • Conexión a internet."
+        "Computador personal. • Conexión a internet."
       ],
       "requisitos": "Conocimientos básicos de ciberseguridad Conocimientos básicos de programación Conocimiento del idioma inglés",
       "source_url": "https://ctt-talleresfisei.uta.edu.ec/curso6.php",
@@ -373,7 +380,8 @@
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "5-abril a 18-mayo-2025",
       "source_checked_on": "2026-10-29",
-      "registration_dates_text": ""
+      "registration_dates_text": "",
+      "requisitos_estado": "publicado"
     }
   },
   {
@@ -443,7 +451,8 @@
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "19-abril a 18-mayo-2025",
       "source_checked_on": "2026-10-29",
-      "registration_dates_text": ""
+      "registration_dates_text": "",
+      "requisitos_estado": "publicado"
     }
   },
   {
@@ -454,6 +463,7 @@
     "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso8.php",
     "is_demo": false,
     "details": {
+      "cupo": "Mínimo 15, Máximo 25",
       "modulos": [
         "Módulo 1: Introducción a la Ciberseguridad Capítulo 1: Introducción a la Ciberseguridad Capítulo 2: Ataques, conceptos y técnicas Capítulo 3: Protegiendo sus datos y su privacidad Capítulo 4: Protegiendo a la organización Capítulo 5: ¿Su futuro estará relacionado con la ciberseguridad?",
         "Módulo 2: Seguridad de Terminales Capítulo 1: Amenazas, vulnerabilidades y ataques a la ciberseguridad\n                    Capítulo 2: Protección de redes\n                    Capítulo 3: Ataque a los fundamentos                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         Capítulo 4: Atacando lo que hacemos\n                    Capítulo 5: Comunicación de red Inalámbrica\n                    Capítulo 6: Infraestructura de seguridad de redes\n                    Capítulo 7: El sistema Operativo Windows\n                    Capítulo 8: Descripción General de Linux\n                    Capítulo 9: Protección de terminales\n                    Capítulo 10: Principios, prácticas y procesos de ciberseguridad"
@@ -500,13 +510,13 @@
         "modalidad": "Virtual",
         "conocimientos previos": "Ninguno"
       },
+      "registration_end": "2025-05-20",
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "Del 17-mayo al 15-junio-2025",
       "source_checked_on": "2026-10-29",
-      "registration_dates_text": "Del 20 de abril al 20 de mayo de 2025",
-      "cupo": "Mínimo 15, Máximo 25",
       "registration_start": "2025-04-20",
-      "registration_end": "2025-05-20"
+      "registration_dates_text": "Del 20 de abril al 20 de mayo de 2025",
+      "requisitos_estado": "publicado"
     }
   },
   {
@@ -583,12 +593,13 @@
         "modalidad": "MOOC",
         "conocimientos previos": "Conocimientos básicos de ciberseguridad. Conocimientos básicos de redes"
       },
+      "registration_end": "2025-06-03",
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "Del 31-mayo al 05-julio-2025",
       "source_checked_on": "2026-10-29",
-      "registration_dates_text": "Del 01 de mayo al 03 de junio de 2025",
       "registration_start": "2025-05-01",
-      "registration_end": "2025-06-03"
+      "registration_dates_text": "Del 01 de mayo al 03 de junio de 2025",
+      "requisitos_estado": "publicado"
     }
   },
   {
@@ -599,6 +610,7 @@
     "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso13.php",
     "is_demo": false,
     "details": {
+      "cupo": "Mínimo 15, máximo 25 participantes",
       "lugar": "Laboratorio asignado - FISEI",
       "horario": "8:00 - 14:00 (Sábados)",
       "modulos": [
@@ -652,20 +664,22 @@
         "Desarrollar habilidades prácticas en electrónica y sistemas integrados, incluyendo el manejo de sensores \n                analógicos/digitales, modulación PWM, integración con herramientas como LabVIEW, y optimización de recursos \n                mediante interrupciones y técnicas de bajo consumo.",
         "Fomentar la creación de soluciones innovadoras y eficientes en automatización, prototipado y adquisición \n                de datos, aplicables en contextos educativos, industriales o de desarrollo tecnológico."
       ],
+      "course_end": "2025-06-30",
       "materiales": [
-        "• Sensores (analógicos y digitales: temperatura, presión, botones, etc.)",
-        "• Motores DC, servomotores y módulos de control de potencia",
-        "• Resistencias, LEDs, protoboards, cables jumper y conectores",
-        "• Multímetros digitales",
-        "• Tarjetas para comunicación serial entre placas Arduino",
-        "• Laboratorio con 25 computadores",
-        "• Tableros de control",
-        "• Internet",
-        "• Proyector"
+        "Sensores (analógicos y digitales: temperatura, presión, botones, etc.)",
+        "Motores DC, servomotores y módulos de control de potencia",
+        "Resistencias, LEDs, protoboards, cables jumper y conectores",
+        "Multímetros digitales",
+        "Tarjetas para comunicación serial entre placas Arduino",
+        "Laboratorio con 25 computadores",
+        "Tableros de control",
+        "Internet",
+        "Proyector"
       ],
       "requisitos": "• Ninguno",
       "source_url": "https://ctt-talleresfisei.uta.edu.ec/curso13.php",
       "certificado": "Certificado digital de asistencia y aprobación con validación QR",
+      "course_start": "2025-06-07",
       "source_fields": {
         "fechas de inscripciones": "Del 19 de mayo al 04 de junio de 2025",
         "el cupo de inscripciones": "Mínimo 15, máximo 25 participantes",
@@ -679,15 +693,13 @@
         "modalidad": "Presencial",
         "conocimientos previos": "• Ninguno"
       },
+      "registration_end": "2025-06-04",
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "Del 07 al 30 de junio de 2025",
       "source_checked_on": "2026-10-29",
-      "registration_dates_text": "Del 19 de mayo al 04 de junio de 2025",
-      "cupo": "Mínimo 15, máximo 25 participantes",
       "registration_start": "2025-05-19",
-      "registration_end": "2025-06-04",
-      "course_start": "2025-06-07",
-      "course_end": "2025-06-30"
+      "registration_dates_text": "Del 19 de mayo al 04 de junio de 2025",
+      "requisitos_estado": "publicado"
     }
   },
   {
@@ -698,6 +710,7 @@
     "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso14.php",
     "is_demo": false,
     "details": {
+      "cupo": "Mínimo 15, máximo 20 participantes",
       "lugar": "CTT – FISEI / Laboratorio asignado",
       "horario": "8:00 - 13:00 (Sábados)",
       "modulos": [
@@ -729,18 +742,20 @@
         "Identificar los derechos que asisten a los titulares de datos personales y las responsabilidades de los \n                distintos actores involucrados en su tratamiento (responsables, encargados, delegados de protección, \n                entre otros).",
         "Aplicar buenas prácticas y herramientas para la protección de datos personales en organizaciones públicas \n                y privadas, con base en ejemplos reales, normativa internacional comparada y estándares como el GDPR europeo."
       ],
+      "course_end": "2025-06-30",
       "materiales": [
-        "• 1 laboratorio (30 computadores)",
-        "• 1 proyector",
-        "• 1 pizarrón",
-        "• Internet",
-        "• Tiza liquida",
-        "• Manuales digitales",
-        "• Plataforma Digital"
+        "1 laboratorio (30 computadores)",
+        "1 proyector",
+        "1 pizarrón",
+        "Internet",
+        "Tiza liquida",
+        "Manuales digitales",
+        "Plataforma Digital"
       ],
       "requisitos": "• Ninguno",
       "source_url": "https://ctt-talleresfisei.uta.edu.ec/curso14.php",
       "certificado": "Certificado digital de asistencia y aprobación con validación QR",
+      "course_start": "2025-06-07",
       "source_fields": {
         "fechas de inscripciones": "Del 15 de Mayo al 04 de Junio de 2025",
         "el cupo de inscripciones": "Mínimo 15, máximo 20 participantes",
@@ -754,15 +769,13 @@
         "modalidad": "Presencial",
         "conocimientos previos": "• Ninguno"
       },
+      "registration_end": "2025-06-04",
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "Del 07 al 30 de junio de 2025",
       "source_checked_on": "2026-10-29",
-      "registration_dates_text": "Del 15 de Mayo al 04 de Junio de 2025",
-      "cupo": "Mínimo 15, máximo 20 participantes",
       "registration_start": "2025-05-15",
-      "registration_end": "2025-06-04",
-      "course_start": "2025-06-07",
-      "course_end": "2025-06-30"
+      "registration_dates_text": "Del 15 de Mayo al 04 de Junio de 2025",
+      "requisitos_estado": "publicado"
     }
   },
   {
@@ -773,6 +786,7 @@
     "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso15.php",
     "is_demo": false,
     "details": {
+      "cupo": "Sin límite específico",
       "lugar": "Virtual",
       "horario": "7:00 PM - 10:00 PM (Miércoles y Jueves)",
       "modulos": [
@@ -807,14 +821,16 @@
         "Explorar y dominar el uso de herramientas de IA gratuitas para hacer más eficiente \n                el proceso de atracción y selección de talento.",
         "Implementar soluciones basadas en IA que mejoren la experiencia de onboarding e \n                integración de nuevos colaboradores."
       ],
+      "course_end": "2025-06-30",
       "materiales": [
-        "• Computador personal",
-        "• Conexión a internet",
-        "• Plataforma Zoom"
+        "Computador personal",
+        "Conexión a internet",
+        "Plataforma Zoom"
       ],
       "requisitos": "• Ninguno",
       "source_url": "https://ctt-talleresfisei.uta.edu.ec/curso15.php",
       "certificado": "Certificado digital de asistencia y aprobación con validación QR",
+      "course_start": "2025-06-04",
       "source_fields": {
         "fechas de inscripciones": "Del 14 de Mayo al 03 de Junio de 2025",
         "el cupo de inscripciones": "Sin límite específico",
@@ -828,15 +844,13 @@
         "modalidad": "Virtual",
         "conocimientos previos": "• Ninguno"
       },
+      "registration_end": "2025-06-03",
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "Del 04 al 30 de junio de 2025",
       "source_checked_on": "2026-10-29",
-      "registration_dates_text": "Del 14 de Mayo al 03 de Junio de 2025",
-      "cupo": "Sin límite específico",
       "registration_start": "2025-05-14",
-      "registration_end": "2025-06-03",
-      "course_start": "2025-06-04",
-      "course_end": "2025-06-30"
+      "registration_dates_text": "Del 14 de Mayo al 03 de Junio de 2025",
+      "requisitos_estado": "publicado"
     }
   },
   {
@@ -925,7 +939,8 @@
       "course_dates_text": "Del 16 de octubre de 2026 al 05 de diciembre de 2026",
       "source_checked_on": "2026-10-29",
       "registration_start": "2026-10-01",
-      "registration_dates_text": "Del 01 de octubre de 2026 al 15 de octubre de 2026"
+      "registration_dates_text": "Del 01 de octubre de 2026 al 15 de octubre de 2026",
+      "requisitos_estado": "publicado"
     }
   },
   {
@@ -1011,7 +1026,8 @@
       "course_dates_text": "Del 16 de octubre de 2026 al 05 de diciembre de 2026",
       "source_checked_on": "2026-10-29",
       "registration_start": "2026-10-01",
-      "registration_dates_text": "Del 01 de octubre de 2026 al 15 de octubre de 2026"
+      "registration_dates_text": "Del 01 de octubre de 2026 al 15 de octubre de 2026",
+      "requisitos_estado": "publicado"
     }
   },
   {
@@ -1110,7 +1126,8 @@
       "course_dates_text": "Del 16 de octubre de 2026 al 16 de noviembre de 2026",
       "source_checked_on": "2026-10-29",
       "registration_start": "2026-10-01",
-      "registration_dates_text": "Del 01 de octubre de 2026 al 15 de octubre de 2026"
+      "registration_dates_text": "Del 01 de octubre de 2026 al 15 de octubre de 2026",
+      "requisitos_estado": "publicado"
     }
   },
   {
@@ -1201,7 +1218,8 @@
       "course_dates_text": "Del 14 de noviembre de 2026 al 05 de diciembre de 2026",
       "source_checked_on": "2026-10-29",
       "registration_start": "2026-10-30",
-      "registration_dates_text": "Del 30 de octubre de 2026 al 13 de noviembre de 2026"
+      "registration_dates_text": "Del 30 de octubre de 2026 al 13 de noviembre de 2026",
+      "requisitos_estado": "publicado"
     }
   },
   {
@@ -1321,7 +1339,8 @@
       "course_dates_text": "Del 14 de noviembre de 2026 al 05 de diciembre de 2026",
       "source_checked_on": "2026-10-29",
       "registration_start": "2026-10-30",
-      "registration_dates_text": "Del 30 de octubre de 2026 al 13 de noviembre de 2026"
+      "registration_dates_text": "Del 30 de octubre de 2026 al 13 de noviembre de 2026",
+      "requisitos_estado": "publicado"
     }
   },
   {
@@ -1415,7 +1434,8 @@
       "course_dates_text": "Del 16 de noviembre de 2026 al 16 de diciembre de 2026",
       "source_checked_on": "2026-10-29",
       "registration_start": "2026-10-30",
-      "registration_dates_text": "Del 30 de octubre de 2026 al 15 de noviembre de 2026"
+      "registration_dates_text": "Del 30 de octubre de 2026 al 15 de noviembre de 2026",
+      "requisitos_estado": "publicado"
     }
   }
 ]
