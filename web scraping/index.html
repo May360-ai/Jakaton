@@ -3,52 +3,155 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cursos Disponibles - FISEI</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <title>Cursos Disponibles - FISEI UTA</title>
+  <meta name="description" content="Catálogo de cursos y certificaciones disponibles en la FISEI - Universidad Técnica de Ambato" />
+
+  <!-- Preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              navy: '#032e54',
+              red: '#a61019',
+              dark: '#1a2333',
+            },
+            telegram: '#0088cc',
+          },
+          fontFamily: {
+            sans: ['Montserrat', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+
   <style>
-    body { font-family: 'Montserrat', sans-serif; background-color: #fff; }
     .badge-pill { font-size: 0.63rem; letter-spacing: 0.07em; }
     .card-title-big { font-size: 2.5rem; line-height: 1.05; font-weight: 900; }
     @media (max-width: 640px) { .card-title-big { font-size: 1.9rem; } }
+
+    /* Animación suave del FAB de Telegram */
+    .fab-telegram {
+      animation: fab-bounce 2s ease-in-out infinite;
+    }
+    @keyframes fab-bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+    .fab-telegram:hover { animation: none; transform: scale(1.1); }
+
+    /* Scroll to top: visible solo si scrolleamos */
+    .scroll-top-btn { opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+    .scroll-top-btn.visible { opacity: 1; pointer-events: all; }
+
+    /* Transición para las tarjetas al cargar */
+    .card-enter {
+      opacity: 0; transform: translateY(16px);
+      animation: card-fade-in 0.4s ease forwards;
+    }
+    @keyframes card-fade-in {
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
-<body class="text-slate-800 antialiased min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-white">
 
-  <!-- ── Encabezado ── -->
-  <header class="text-center mb-12">
-    <span class="text-[#b91c1c] tracking-[0.35em] font-bold text-xs uppercase block mb-2">
+<body class="font-sans text-slate-800 antialiased min-h-screen bg-white">
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       HEADER
+       ════════════════════════════════════════════════════════════════════ -->
+  <header class="text-center pt-12 pb-10 px-4">
+    <span class="text-brand-red tracking-[0.35em] font-bold text-xs uppercase block mb-2">
       C U R S O S
     </span>
-    <h1 class="text-4xl font-extrabold text-[#1a2333] tracking-tight">
+    <h1 class="text-4xl sm:text-5xl font-extrabold text-brand-dark tracking-tight mb-3">
       Cursos Disponibles
     </h1>
+    <p class="text-slate-400 text-sm max-w-lg mx-auto">
+      Catálogo actualizado de cursos y certificaciones de la
+      <strong class="text-slate-500">FISEI – UTA</strong>
+    </p>
   </header>
 
-  <!-- ── Grilla ── -->
-  <main class="max-w-6xl mx-auto">
+  <!-- ════════════════════════════════════════════════════════════════════════
+       FILTROS
+       ════════════════════════════════════════════════════════════════════ -->
+  <nav class="max-w-6xl mx-auto px-4 sm:px-6 mb-8 flex flex-wrap gap-2">
+    <button onclick="filtrar('TODOS')" data-filtro="TODOS"
+      class="filtro-btn bg-brand-dark text-white px-5 py-2 rounded-full font-bold text-[0.68rem] tracking-widest uppercase transition-all">
+      Todos
+    </button>
+    <button onclick="filtrar('ABIERTO')" data-filtro="ABIERTO"
+      class="filtro-btn bg-white border border-slate-200 text-slate-500 px-5 py-2 rounded-full font-bold text-[0.68rem] tracking-widest uppercase transition-all hover:border-emerald-500 hover:text-emerald-600">
+      Abiertos
+    </button>
+    <button onclick="filtrar('CERRADO')" data-filtro="CERRADO"
+      class="filtro-btn bg-white border border-slate-200 text-slate-500 px-5 py-2 rounded-full font-bold text-[0.68rem] tracking-widest uppercase transition-all hover:border-slate-400 hover:text-slate-600">
+      Cerrados
+    </button>
+    <!-- Contador dinámico -->
+    <span id="counter" class="ml-auto self-center text-xs text-slate-400 font-semibold tracking-wide"></span>
+  </nav>
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       GRILLA DE CURSOS
+       ════════════════════════════════════════════════════════════════════ -->
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 pb-24">
     <div id="cursos-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    </div>
+
+    <!-- Empty state -->
+    <div id="empty-state" class="hidden text-center py-20">
+      <svg class="w-16 h-16 mx-auto text-slate-200 mb-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>
+      </svg>
+      <p class="text-slate-400 font-semibold">No hay cursos en esta categoría.</p>
     </div>
   </main>
 
-  <!-- ── Scroll to top ── -->
-  <a href="#" class="fixed bottom-6 right-6 bg-[#93151b] hover:bg-[#781015] text-white p-3 rounded-lg shadow-lg transition-transform hover:scale-105 flex items-center justify-center">
+  <!-- ════════════════════════════════════════════════════════════════════════
+       FAB: TELEGRAM BOT
+       ════════════════════════════════════════════════════════════════════ -->
+  <a href="https://t.me/FISEI_CursosBot" target="_blank" rel="noopener noreferrer"
+     title="¿Dudas? Habla con nuestro bot de Telegram"
+     class="fab-telegram fixed bottom-6 left-6 bg-telegram hover:bg-[#006da3] text-white p-4 rounded-full shadow-lg transition-all flex items-center justify-center z-50 group">
+    <!-- Telegram icon -->
+    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.492-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+    </svg>
+    <!-- Tooltip -->
+    <span class="absolute left-full ml-3 px-3 py-1.5 bg-slate-800 text-white text-xs font-semibold rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg">
+      Chatea con nuestro Bot 🤖
+    </span>
+  </a>
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       FAB: SCROLL TO TOP
+       ════════════════════════════════════════════════════════════════════ -->
+  <button onclick="window.scrollTo({top:0, behavior:'smooth'})" id="scroll-top"
+    class="scroll-top-btn fixed bottom-6 right-6 bg-brand-red hover:bg-[#781015] text-white p-3 rounded-lg shadow-lg transition-all flex items-center justify-center z-50">
     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" d="M5 11l7-7 7 7M5 19l7-7 7 7" />
     </svg>
-  </a>
+  </button>
 
+  <!-- ════════════════════════════════════════════════════════════════════════
+       JAVASCRIPT
+       ════════════════════════════════════════════════════════════════════ -->
   <script>
-    // ─── Datos completos del scraper + nombres cortos para la vista ───────────
-    // Cursos 1-6: tipo "color" (header con fondo sólido azul/rojo)
-    // Cursos 7+:  tipo "imagen" (header con foto real del curso)
+    // ─── Datos del scraper ───────────────────────────────────────────────────
     const CURSOS = [
       {
         id:"01", anio:"2026", tipo:"color", color:"#032e54",
-        nombreCorto:"CCNA",
-        subtitulo:"INTRODUCCIÓN A LAS REDES",
+        nombreCorto:"CCNA", subtitulo:"INTRODUCCIÓN A LAS REDES",
         descripcion:"INTRODUCCIÓN A LAS REDES – PREPARACIÓN CCNA",
         duracion:"70 HORAS", estado:"ABIERTO",
         enlace:"https://ctt-talleresfisei.uta.edu.ec/curso16.php",
@@ -56,8 +159,7 @@
       },
       {
         id:"02", anio:"2026", tipo:"color", color:"#032e54",
-        nombreCorto:"LINUX",
-        subtitulo:"LINUX ESSENTIALS",
+        nombreCorto:"LINUX", subtitulo:"LINUX ESSENTIALS",
         descripcion:"PREPARACIÓN LINUX ESSENTIALS CERTIFICATE",
         duracion:"70 HORAS", estado:"ABIERTO",
         enlace:"https://ctt-talleresfisei.uta.edu.ec/curso17.php",
@@ -65,8 +167,7 @@
       },
       {
         id:"03", anio:"2026", tipo:"color", color:"#a61019",
-        nombreCorto:"PYTHON 1",
-        subtitulo:"FUNDAMENTOS DE PYTHON",
+        nombreCorto:"PYTHON 1", subtitulo:"FUNDAMENTOS DE PYTHON",
         descripcion:"FUNDAMENTOS DE PYTHON 1",
         duracion:"32 HORAS", estado:"ABIERTO",
         enlace:"https://ctt-talleresfisei.uta.edu.ec/curso18.php",
@@ -74,8 +175,7 @@
       },
       {
         id:"04", anio:"2026", tipo:"color", color:"#032e54",
-        nombreCorto:"GITHUB / IA",
-        subtitulo:"AGENTIC AI DEVELOPER",
+        nombreCorto:"GITHUB / IA", subtitulo:"AGENTIC AI DEVELOPER",
         descripcion:"GITHUB CERTIFIED: AGENTIC AI DEVELOPER (GH-600)",
         duracion:"32 HORAS", estado:"ABIERTO",
         enlace:"https://ctt-talleresfisei.uta.edu.ec/curso19.php",
@@ -83,8 +183,7 @@
       },
       {
         id:"05", anio:"2026", tipo:"color", color:"#032e54",
-        nombreCorto:"ARDUINO",
-        subtitulo:"ARDUINO CERTIFICATION",
+        nombreCorto:"ARDUINO", subtitulo:"ARDUINO CERTIFICATION",
         descripcion:"PREPARACIÓN ARDUINO CERTIFICATION PROGRAM",
         duracion:"32 HORAS", estado:"ABIERTO",
         enlace:"https://ctt-talleresfisei.uta.edu.ec/curso20.php",
@@ -92,14 +191,13 @@
       },
       {
         id:"06", anio:"2026", tipo:"color", color:"#a61019",
-        nombreCorto:"PYTHON 2",
-        subtitulo:"PYTHON PROGRAMMER",
+        nombreCorto:"PYTHON 2", subtitulo:"PYTHON PROGRAMMER",
         descripcion:"FUNDAMENTOS DE PYTHON 2",
         duracion:"40 HORAS", estado:"ABIERTO",
         enlace:"https://ctt-talleresfisei.uta.edu.ec/curso21.php",
         imagen:"https://ctt-talleresfisei.uta.edu.ec/img/curso21.jpg"
       },
-      // ── A partir de aquí: tipo "imagen" (header con foto) ──────────────────
+      // ── Tipo imagen ──
       {
         id:"07", anio:"2026", tipo:"imagen",
         descripcion:"ARDUINO DESDE CERO: ELECTRÓNICA, PROGRAMACIÓN Y AUTOMATIZACIÓN",
@@ -186,112 +284,143 @@
       }
     ];
 
-    // ── Íconos SVG reutilizables ──────────────────────────────────────────────
-    const SVG_PERSONAS = `<svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-      <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v1h8v-1zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 16v-1a4 4 0 00-2.4-3.66A6 6 0 0118 16h-2z"/>
-    </svg>`;
+    // ─── Configuración del bot de Telegram ────────────────────────────────────
+    // Cambiar este valor cuando el bot esté listo
+    const TELEGRAM_BOT_URL = 'https://t.me/FISEI_CursosBot';
 
-    const SVG_RELOJ = `<svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-    </svg>`;
+    // ─── SVGs reutilizables ──────────────────────────────────────────────────
+    const SVG = {
+      personas: `<svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v1h8v-1zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 16v-1a4 4 0 00-2.4-3.66A6 6 0 0118 16h-2z"/></svg>`,
+      reloj: `<svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`,
+    };
 
-    // ── Footer blanco compartido por ambos tipos ───────────────────────────────
+    // ─── Estado global ───────────────────────────────────────────────────────
+    let filtroActual = 'TODOS';
+
+    // ─── Footer compartido ───────────────────────────────────────────────────
     function footerHTML(c) {
       const esCerrado = c.estado === 'CERRADO';
-      const btnInscripcion = esCerrado
-        ? `<button disabled class="mt-3 px-4 py-2 bg-slate-200 text-slate-400 font-bold text-xs uppercase tracking-widest rounded cursor-not-allowed">
+      const btn = esCerrado
+        ? `<button disabled class="mt-auto px-4 py-2 bg-slate-200 text-slate-400 font-bold text-xs uppercase tracking-widest rounded cursor-not-allowed">
              Inscripciones cerradas
            </button>`
         : `<a href="${c.enlace}" target="_blank" rel="noopener noreferrer"
-             class="mt-3 inline-block px-5 py-2 bg-[#a61019] hover:bg-[#881318] text-white font-extrabold text-xs uppercase tracking-widest rounded transition-colors">
-             INSCRIBIRME
+             class="mt-auto inline-block px-5 py-2 bg-brand-red hover:bg-[#881318] text-white font-extrabold text-xs uppercase tracking-widest rounded transition-colors">
+             Inscribirme
            </a>`;
 
       return `
         <div class="bg-white px-5 pt-4 pb-5 flex flex-col gap-2 border border-slate-100 border-t-0 rounded-b-xl flex-1">
-          <!-- Estado + horas -->
           <div class="flex items-center gap-5 text-[0.67rem] font-bold uppercase tracking-widest text-rose-700">
-            <div class="flex items-center gap-1.5">
-              ${SVG_PERSONAS}
-              <span>${c.estado}</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              ${SVG_RELOJ}
-              <span>${c.duracion}</span>
-            </div>
+            <div class="flex items-center gap-1.5">${SVG.personas}<span>${c.estado}</span></div>
+            <div class="flex items-center gap-1.5">${SVG.reloj}<span>${c.duracion}</span></div>
           </div>
-          <!-- Descripción -->
-          <h3 class="text-[0.78rem] font-extrabold text-[#1a2333] uppercase tracking-tight leading-snug">
+          <h3 class="text-[0.78rem] font-extrabold text-brand-dark uppercase tracking-tight leading-snug">
             ${c.descripcion}
           </h3>
-          <!-- Botón -->
-          ${btnInscripcion}
+          ${btn}
         </div>`;
     }
 
-    // ── Card tipo A: header coloreado ─────────────────────────────────────────
+    // ─── Card tipo A: header coloreado ───────────────────────────────────────
     function cardColor(c) {
       return `
-        <!-- Header coloreado -->
         <div style="background-color:${c.color}; min-height:210px;"
              class="p-5 flex flex-col justify-between rounded-t-xl">
           <div>
-            <!-- Badge CURSO XX · AÑO -->
             <div class="inline-flex items-center bg-white text-slate-900 font-extrabold badge-pill px-2.5 py-[5px] rounded mb-4 uppercase tracking-widest whitespace-nowrap">
               CURSO ${c.id}&nbsp;&middot;&nbsp;${c.anio}
             </div>
-            <!-- Nombre corto grande -->
-            <h2 class="card-title-big text-white uppercase tracking-tight mb-1">
-              ${c.nombreCorto}
-            </h2>
-            <!-- Subtítulo -->
-            <p class="text-[0.68rem] font-semibold text-white/60 uppercase tracking-widest leading-tight">
-              ${c.subtitulo}
-            </p>
+            <h2 class="card-title-big text-white uppercase tracking-tight mb-1">${c.nombreCorto}</h2>
+            <p class="text-[0.68rem] font-semibold text-white/60 uppercase tracking-widest leading-tight">${c.subtitulo}</p>
           </div>
-          <!-- Horas badge -->
           <div class="mt-5">
-            <span class="inline-block bg-white/90 text-slate-800 font-extrabold badge-pill px-3 py-[5px] rounded uppercase">
-              ${c.duracion}
-            </span>
+            <span class="inline-block bg-white/90 text-slate-800 font-extrabold badge-pill px-3 py-[5px] rounded uppercase">${c.duracion}</span>
           </div>
         </div>
         ${footerHTML(c)}`;
     }
 
-    // ── Card tipo B: header con imagen ────────────────────────────────────────
+    // ─── Card tipo B: header con imagen ──────────────────────────────────────
     function cardImagen(c) {
       const esCerrado = c.estado === 'CERRADO';
       return `
-        <!-- Header imagen -->
-        <div class="rounded-t-xl overflow-hidden" style="height:200px;">
-          <img src="${c.imagen}"
-               alt="${c.descripcion}"
-               class="w-full h-full object-cover ${esCerrado ? 'grayscale opacity-70' : ''}"
+        <div class="rounded-t-xl overflow-hidden bg-slate-100" style="height:200px;">
+          <img src="${c.imagen}" alt="${c.descripcion}"
+               class="w-full h-full object-cover ${esCerrado ? 'grayscale opacity-60' : ''}"
                loading="lazy"
-               onerror="this.style.display='none'; this.parentElement.style.background='#1a2e44';" />
+               onerror="this.style.display='none'; this.parentElement.classList.add('bg-brand-navy');" />
         </div>
         ${footerHTML(c)}`;
     }
 
-    // ── Render principal ──────────────────────────────────────────────────────
+    // ─── Render ──────────────────────────────────────────────────────────────
     function renderCursos(cursos) {
       const grid = document.getElementById('cursos-grid');
+      const empty = document.getElementById('empty-state');
+      const counter = document.getElementById('counter');
+
       grid.innerHTML = '';
 
-      cursos.forEach((c) => {
-        const esCerrado = c.estado === 'CERRADO';
+      if (cursos.length === 0) {
+        grid.classList.add('hidden');
+        empty.classList.remove('hidden');
+        counter.textContent = '';
+        return;
+      }
+
+      grid.classList.remove('hidden');
+      empty.classList.add('hidden');
+
+      const abiertos = cursos.filter(c => c.estado === 'ABIERTO').length;
+      const cerrados = cursos.filter(c => c.estado === 'CERRADO').length;
+      counter.textContent = filtroActual === 'TODOS'
+        ? `${abiertos} abiertos · ${cerrados} cerrados`
+        : `${cursos.length} curso${cursos.length !== 1 ? 's' : ''}`;
+
+      cursos.forEach((c, i) => {
         const card = document.createElement('div');
         card.className = [
-          'flex flex-col rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300',
-          esCerrado ? 'opacity-80' : ''
+          'card-enter flex flex-col rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300',
+          c.estado === 'CERRADO' ? 'opacity-75' : '',
         ].join(' ');
-
+        card.style.animationDelay = `${i * 60}ms`;
         card.innerHTML = c.tipo === 'color' ? cardColor(c) : cardImagen(c);
         grid.appendChild(card);
       });
     }
 
+    // ─── Filtro ──────────────────────────────────────────────────────────────
+    function filtrar(estado) {
+      filtroActual = estado;
+
+      // Actualizar botones
+      document.querySelectorAll('.filtro-btn').forEach(btn => {
+        const isActive = btn.dataset.filtro === estado;
+        btn.classList.toggle('bg-brand-dark', isActive);
+        btn.classList.toggle('text-white', isActive);
+        btn.classList.toggle('bg-white', !isActive);
+        btn.classList.toggle('text-slate-500', !isActive);
+        btn.classList.toggle('border-slate-200', !isActive);
+        btn.classList.toggle('border', !isActive);
+      });
+
+      const filtered = estado === 'TODOS'
+        ? CURSOS
+        : CURSOS.filter(c => c.estado === estado);
+
+      renderCursos(filtered);
+    }
+
+    // ─── Scroll-to-top visibility ────────────────────────────────────────────
+    const scrollBtn = document.getElementById('scroll-top');
+    window.addEventListener('scroll', () => {
+      scrollBtn.classList.toggle('visible', window.scrollY > 300);
+    }, { passive: true });
+
+    // ─── Init ────────────────────────────────────────────────────────────────
     renderCursos(CURSOS);
   </script>
 </body>
