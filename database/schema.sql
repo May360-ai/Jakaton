@@ -16,6 +16,7 @@ create table if not exists public.courses (
     contenido text,
     enlace text,
     is_demo boolean not null default false,
+    details jsonb not null default '{}'::jsonb,
     created_at timestamptz not null default now()
 );
 alter table public.courses enable row level security;

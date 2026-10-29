@@ -37,7 +37,8 @@ def answer(chat, courses):
         return {'reply': 'No tengo descuentos ni gratuidad autorizados. Puedo orientarte sobre el contenido disponible o pedir a un asesor que confirme las condiciones oficiales. ¿Qué curso te interesa?', 'state': 'dudoso', 'handover': False, 'summary': 'Consulta condiciones comerciales; no se autorizó ninguna promoción.'}
     key = os.getenv('GEMINI_API_KEY') or os.getenv('LLM_API_KEY') or os.getenv('OPENAI_API_KEY')
     if key:
-        messages = [{'role': 'system', 'content': ROOT_POLICY + '\nCATÁLOGO: ' + json.dumps(courses, ensure_ascii=False)}]
+        context = {'catalogo': courses, 'curso_seleccionado': chat.get('selected_course'), 'perfil': chat.get('profile', {})}
+        messages = [{'role': 'system', 'content': ROOT_POLICY + '\nDATOS DE REFERENCIA: ' + json.dumps(context, ensure_ascii=False)}]
         for message in chat['messages'][-12:]:
             messages.append({'role': 'user' if message['role'] == 'user' else 'assistant', 'content': message['text'][:2000]})
         response = requests.post(os.getenv('LLM_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta/openai').rstrip('/') + '/chat/completions', headers={'Authorization': 'Bearer ' + key}, json={

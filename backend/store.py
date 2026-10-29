@@ -31,7 +31,7 @@ class Store:
     def courses(self, fallback):
         if not self.remote:
             return fallback
-        return self._request('GET', table='courses', params={'select': 'id,titulo,estado,duracion,contenido,enlace,is_demo', 'order': 'id.asc', 'limit': '100'})
+        return self._request('GET', table='courses', params={'select': 'id,titulo,estado,duracion,contenido,enlace,is_demo,details', 'order': 'is_demo.asc,id.asc', 'limit': '100'})
 
     def all(self):
         with self.lock:

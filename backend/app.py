@@ -12,7 +12,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from flask import Flask, Response, jsonify, request, send_from_directory, session
 
-from backend import agents, telegram
+from backend import agents, telegram, bot_flow
 from backend.store import Store
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -35,6 +35,16 @@ def create_app(store=None):
     app.config.update(MAX_CONTENT_LENGTH=16384, SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE='Strict')
     db = store or Store()
     catalog = db.courses(COURSES)
+    catalog_updated = time.monotonic()
+    catalog_lock = threading.Lock()
+
+    def current_catalog():
+        nonlocal catalog, catalog_updated
+        with catalog_lock:
+            if time.monotonic() - catalog_updated >= 15:
+                catalog = db.courses(COURSES)
+                catalog_updated = time.monotonic()
+            return catalog
     listeners = set()
     listener_lock = threading.Lock()
     locks = {}
@@ -60,20 +70,25 @@ def create_app(store=None):
     def append(chat, role, text):
         chat['messages'].append({'id': secrets.token_hex(6), 'role': role, 'text': text, 'at': now()})
 
-    def deliver(chat, text):
+    def deliver(chat, text, markup=None):
         if chat.get('telegram_id'):
-            telegram.send(chat['telegram_id'], text)
+            telegram.send(chat['telegram_id'], text, reply_markup=markup)
 
-    def infer(chat_id, revision):
+    def infer(chat_id, revision, prompt=None, markup=None):
         try:
             snapshot = db.get(chat_id)
-            result = agents.answer(snapshot, catalog)
+            if prompt:
+                snapshot['messages'].append({'role': 'user', 'text': prompt})
+            reference = bot_flow.available(current_catalog()) if snapshot.get('telegram_id') else current_catalog()
+            if snapshot.get('telegram_id') and snapshot.get('selected_course'):
+                reference = [course for course in reference if course['id'] == snapshot['selected_course']]
+            result = agents.answer(snapshot, reference)
             with chat_lock(chat_id):
                 chat = db.get(chat_id)
                 # Taking over or a newer message invalidates in-flight inference.
                 if chat['mode'] != 'ai' or chat['revision'] != revision:
                     return
-                deliver(chat, result['reply'])
+                deliver(chat, result['reply'], markup)
                 append(chat, 'assistant', result['reply'])
                 chat.update(state=result['state'], summary=result['summary'], pending=False, error=None)
                 if result['handover']:
@@ -87,17 +102,41 @@ def create_app(store=None):
                     chat.update(mode='human', pending=False, error='No se pudo generar o entregar la respuesta. Requiere atención humana.')
                     save(chat)
 
-    def receive(chat_id, name, text, telegram_id=None, update_id=None):
+    def receive(chat_id, name, text, telegram_id=None, update_id=None, action=None):
         with chat_lock(chat_id):
             chat = db.get(chat_id) or {'id': chat_id, 'name': name[:80], 'telegram_id': telegram_id, 'mode': 'ai', 'state': 'interesado', 'summary': 'Conversación nueva', 'messages': [], 'revision': 0, 'updates': [], 'pending': False, 'error': None}
             if update_id and update_id in chat['updates']:
                 return chat
             if update_id:
                 chat['updates'] = (chat['updates'] + [update_id])[-100:]
+            if telegram_id:
+                text = bot_flow.label(action, current_catalog()) if action is not None else text
             append(chat, 'user', text[:4000])
             state, handover = agents.triage(text)
             chat['state'] = state
             chat['revision'] += 1
+            if telegram_id:
+                chat['pending'] = False
+                if chat['mode'] == 'human':
+                    save(chat)
+                    return chat
+                flow = bot_flow.route(chat, text, current_catalog(), action)
+                chat['state'] = flow['state']
+                chat['summary'] = f"Curso: {chat.get('selected_course', 'sin seleccionar')}. Perfil: {chat.get('profile', {})}. Última acción: {text[:200]}"
+                chat['mode'] = 'human' if flow['handover'] else 'ai'
+                chat['pending'] = flow['infer']
+                save(chat)
+                if flow['infer']:
+                    threading.Thread(target=infer, args=(chat_id, chat['revision'], flow.get('prompt'), flow['markup'] or bot_flow.home_keyboard()), daemon=True).start()
+                else:
+                    try:
+                        deliver(chat, flow['text'], flow['markup'])
+                        append(chat, 'assistant', flow['text'])
+                        chat['error'] = None
+                    except Exception:
+                        chat.update(mode='human', error='No se pudo entregar la respuesta por Telegram. Requiere atención humana.')
+                    save(chat)
+                return chat
             if handover:
                 chat.update(mode='human', pending=False, summary='Solicita atención humana: ' + text[:240])
                 notice = 'Te paso con una persona del equipo. Podrá ver esta conversación para ayudarte.'
@@ -154,7 +193,7 @@ def create_app(store=None):
 
     @app.get('/api/courses')
     def courses():
-        return jsonify(catalog)
+        return jsonify(current_catalog())
 
     @app.post('/api/demo')
     def demo():
@@ -232,5 +271,6 @@ if __name__ == '__main__':
     if host != '127.0.0.1' and not os.getenv('DASHBOARD_PASSWORD'):
         raise RuntimeError('Configura DASHBOARD_PASSWORD antes de publicar el panel')
     if os.getenv('TELEGRAM_BOT_TOKEN'):
+        telegram.configure()
         telegram.start_polling(app.extensions['receive'])
     serve(app, host=host, port=int(os.getenv('PORT', '5000')), threads=24)

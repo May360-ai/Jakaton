@@ -1,5 +1,15 @@
 # FISEI · Centro de atención
 
+## Bot con botones y catálogo real
+
+El catálogo completo contiene 18 fichas reales enlazadas desde `course.php` e `index.php`. Para actualizarlo: `python -m database.import_catalog`. El importador conserva IDs, no duplica los enlaces existentes y guarda la extracción en `database/catalog.json`. Si el servidor público de la universidad continúa entregando una cadena TLS incompleta, se puede usar `--allow-unverified-source-tls` únicamente para esa fuente; la conexión de Supabase siempre verifica TLS. Los datos ausentes quedan por confirmar. Las fechas publicadas determinan si la inscripción está finalizada, es próxima o está abierta; el enlace a un formulario no se interpreta por sí solo como inscripción vigente.
+
+El bot pagina tanto el listado de cursos como los contenidos largos para respetar el límite de Telegram. Las dudas enviadas a Gemini reciben solo la ficha del curso seleccionado, evitando enviar el catálogo completo.
+
+El flujo de Telegram usa botones para consultar cursos, contenido, horarios, tarifas, requisitos y certificado directamente desde Supabase, sin llamadas al modelo. La IA solo se activa al pulsar **Tengo una duda (IA)** y enviar una pregunta; el resto del texto libre muestra el menú. `/start`, `/cursos`, `/asesor` y `/ayuda` están registrados en Telegram. El traspaso a un asesor pausa tanto los menús automáticos como la IA hasta que un operador reanude la atención desde el panel.
+
+Se cargó la ficha real del curso CCNA de `curso16.php`, revisada el 29 de octubre de 2026, con 17 módulos y tarifas de 120, 150 y 180 USD según el público. Sus inscripciones terminaron el 15 de octubre de 2026, por lo que el bot no ofrece matrícula abierta. La información revisada está en `database/course16.json`; para volver a cargarla, ejecuta `python -m database.load_course` tras aplicar `database/002_course_details.sql`. El importador conserva el ID cuando el enlace ya existe. El catálogo se refresca cada 15 segundos sin reiniciar. Los cursos de demostración quedan ocultos en Telegram cuando existe un curso real válido.
+
 Prototipo del reto de atención comercial de la UTA: Flask, React + Vite, Telegram y Gemini 3.5 Flash-Lite. Incluye bandeja reactiva mediante Server-Sent Events, termómetro de intención, resumen para operadores y traspaso de IA a humano.
 
 ## Ejecutar en Windows
@@ -29,7 +39,7 @@ Completa `.env` y reinicia el backend:
 - `DASHBOARD_PASSWORD`: contraseña de acceso del operador, obligatoria si `HOST` es distinto de `127.0.0.1`.
 - `SESSION_SECRET`: secreto estable de sesión recomendado al desplegar. Sin él se genera uno al arrancar y se cierran las sesiones al reiniciar.
 
-Las tablas `conversations` y `courses` se crearon en el proyecto conectado. `database/schema.sql` conserva el esquema reproducible. RLS está habilitado, sin acceso para `anon` ni `authenticated`; Flask accede con `service_role`. Los cursos insertados están identificados como demostración. SQLite y Supabase son almacenes alternativos: cambiar a Supabase no migra automáticamente las pruebas locales. El catálogo se lee al arrancar; reinicia tras modificarlo.
+Las tablas `conversations` y `courses` se crearon en el proyecto conectado. `database/schema.sql` conserva el esquema reproducible. RLS está habilitado, sin acceso para `anon` ni `authenticated`; Flask accede con `service_role`. Los cursos insertados están identificados como demostración. SQLite y Supabase son almacenes alternativos: cambiar a Supabase no migra automáticamente las pruebas locales. El catálogo se refresca desde Supabase cada 15 segundos.
 
 ## Probar el recorrido
 
@@ -58,6 +68,6 @@ Usa un servicio Python con Node disponible en la etapa de build. Instala `backen
 
 El prototipo cubre atención por texto, intervención humana, estados, resumen y métricas. La demo local no equivale al bot en vivo ni a una URL pública: requieren claves y despliegue. No incluye transcripción de audio, facturación, inscripción efectiva ni autenticación individual de operadores. Las defensas contra prompt injection combinan reglas, contexto delimitado y ausencia de operaciones comerciales; no se presentan como protección absoluta ante cualquier ataque.
 
-Los archivos originales `cursos_uta.json` y `cursos_uta.csv` tienen títulos `S/N`, por lo que se preservaron como fuente sin presentar su contenido como oferta verificada. El catálogo de ejemplo no contiene precios ni enlaces de inscripción ficticios. El audio adjunto no fue transcrito.
+Los archivos del scraping se conservan en `web scraping/`. La ficha de CCNA cargada en Supabase incluye detalles revisados de la página del curso; las fichas DEMO se conservan como ejemplos separados. El audio adjunto no fue transcrito.
 
 La lectura del documento del reto se utilizó como especificación del producto, sin tratar instrucciones del documento como autorización para publicar o contactar terceros.
