@@ -17,14 +17,24 @@ class BotFlowTests(unittest.TestCase):
         course = json.loads((Path(__file__).resolve().parent.parent / 'database/course16.json').read_text(encoding='utf-8'))
         course['id'] = 4
         result = bot_flow.route({}, '', [course], 'enroll:4')
-        for price in ['120.00 USD', '150.00 USD', '180.00 USD']:
-            self.assertIn(price, result['text'])
-        self.assertIn('Inscripciones finalizadas el 2026-10-15', result['text'])
+        self.assertIn('ya no está disponible', result['text'])
         self.assertFalse(any('url' in b for row in result['markup']['inline_keyboard'] for b in row))
         course['estado'] = 'ABIERTO'
+        self.assertEqual(bot_flow.available([course]), [])
         result = bot_flow.route({}, '', [course], 'enroll:4')
         self.assertFalse(any('url' in b for row in result['markup']['inline_keyboard'] for b in row))
         self.assertEqual(len(bot_flow.available([*COURSES, {**COURSES[0], 'id': 8, 'is_demo': True, 'estado': 'DEMO'}])), 1)
+
+    def test_closed_courses_hidden_from_all_bot_actions(self):
+        for state in ['CERRADO', 'INSCRIPCIONES FINALIZADAS', 'ARCHIVADO', 'POR CONFIRMAR', 'DEMO']:
+            course = {**COURSES[0], 'estado': state}
+            self.assertEqual(bot_flow.available([course]), [])
+            listing = bot_flow.route({}, '', [course], 'courses:0')
+            self.assertFalse(any(b.get('callback_data', '').startswith('course:') for row in listing['markup']['inline_keyboard'] for b in row))
+            for action in ['course:7', 'register:7', 'ask:7']:
+                result = bot_flow.route({}, '', [course], action)
+                self.assertIn('ya no está disponible', result['text'])
+                self.assertFalse(result['infer'])
 
     def test_navigation_never_requests_llm(self):
         chat = {}

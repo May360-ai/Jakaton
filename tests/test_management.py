@@ -44,6 +44,7 @@ class ManagementTests(unittest.TestCase):
         html = '<h1 class="tituloCurso">Redes</h1><div class="pc-tab"><section><div class="tab1"><ul><li><strong>Cupo:</strong>20</li><li><strong>Beneficiarios:</strong>Docentes</li><li><strong>Conocimientos previos:</strong>TCP/IP</li></ul></div></section></div>'
         course = parse_course(html, 'https://example.edu/course.php', '2026-10-29')
         course['id'] = 7
+        course['estado'] = 'ABIERTO'
         result = route({}, '', [course], 'requirements:7')
         for text in ['Cupo:', '20', 'Beneficiarios:', 'Docentes', 'TCP/IP']:
             self.assertIn(text, result['text'])

@@ -35,9 +35,12 @@ def course_keyboard(course):
 
 
 def available(courses):
-    valid = [c for c in courses if c.get('titulo') and c['titulo'].strip().upper() != 'S/N' and c.get('estado') != 'ARCHIVADO']
-    real = [c for c in valid if (not c.get('is_demo') and c.get('estado') != 'DEMO') or (c.get('is_demo') and c.get('estado') == 'ABIERTO')]
-    return real or valid
+    today = datetime.now(timezone(timedelta(hours=-5))).date().isoformat()
+    return [c for c in courses
+            if c.get('titulo') and c['titulo'].strip().upper() != 'S/N'
+            and c.get('estado') in ['ABIERTO', 'PRÓXIMAMENTE']
+            and not ((c.get('details') or {}).get('registration_end')
+                     and c['details']['registration_end'] < today)]
 
 
 def label(action, courses):

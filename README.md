@@ -95,3 +95,5 @@ Telegram ofrece Inscribirme en un curso en el menú, /inscribirme y un botón di
 Cada conversación ofrece Inscribir persona sin salir de la bandeja. Reutiliza los datos disponibles y adjunta la inscripción al chat seleccionado, con su estado visible en el hilo. El resumen usa nombres de curso, experiencia, objetivo, última consulta y siguiente paso sugerido; omite mensajes de captura de datos y eventos técnicos del menú. Se calcula también para conversaciones anteriores.
 
 Los tres cursos iniciales de demostración están habilitados como ABIERTO y marcados con DEMO. Permiten probar el registro sin modificar los estados de los cursos oficiales. Una inscripción de demostración advierte que no corresponde realizar pagos reales.
+
+El catálogo de Telegram solo muestra cursos ABIERTO o PRÓXIMAMENTE con plazo de inscripción no vencido. Cerrados, archivados y por confirmar permanecen en el dashboard; los botones antiguos hacia esas fichas devuelven que ya no están disponibles. No se reutiliza el catálogo completo como alternativa cuando no hay cursos vigentes.
