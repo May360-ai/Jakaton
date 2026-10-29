@@ -43,7 +43,7 @@ def answer(chat, courses):
         response = requests.post(os.getenv('LLM_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta/openai').rstrip('/') + '/chat/completions', headers={'Authorization': 'Bearer ' + key}, json={
             'model': os.getenv('LLM_MODEL', 'gemini-3.5-flash-lite'), 'messages': messages,
             'response_format': {'type': 'json_object'}, 'max_tokens': 1800,
-        }, timeout=30)
+        }, timeout=(10, 75))
         response.raise_for_status()
         result = json.loads(response.json()['choices'][0]['message']['content'])
         if result.get('state') not in ['interesado', 'dudoso', 'frustrado', 'caliente'] or not isinstance(result.get('reply'), str) or not isinstance(result.get('handover'), bool):
