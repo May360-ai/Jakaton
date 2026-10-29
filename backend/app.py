@@ -6,6 +6,7 @@ import queue
 import secrets
 import threading
 import time
+import base64
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -13,7 +14,7 @@ from dotenv import load_dotenv
 from flask import Flask, Response, jsonify, request, send_from_directory, session
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from backend import agents, telegram, bot_flow, enrollment, operator_summary
+from backend import agents, telegram, bot_flow, enrollment, operator_summary, receipts
 from backend.store import Store
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -76,6 +77,35 @@ def create_app(store=None):
         if chat.get('telegram_id'):
             telegram.send(chat['telegram_id'], text, reply_markup=markup)
 
+    def release_if_idle(chat):
+        if chat.get('mode') != 'human':
+            return False
+        last = chat.get('operator_last_activity')
+        if last is None:
+            chat['operator_last_activity'] = time.time()
+            save(chat)
+            return False
+        if time.time() - last < 300:
+            return False
+        chat.update(mode='ai', bot_chat=True, pending=False, waiting_for_advisor=False, revision=chat.get('revision',0)+1)
+        notice = 'El asistente automático retomó la conversación tras cinco minutos sin actividad del operador. Puedes escribir tu consulta o usar los botones.'
+        append(chat, 'assistant', notice)
+        save(chat)
+        try:
+            deliver(chat, notice, bot_flow.home_keyboard())
+        except Exception:
+            chat['error'] = 'El bot retomó la atención, pero no se pudo entregar el aviso.'
+            save(chat)
+        return True
+
+    def expire_handovers():
+        for item in db.all():
+            if item.get('mode') == 'human':
+                with chat_lock(item['id']):
+                    current = db.get(item['id'])
+                    if current:
+                        release_if_idle(current)
+
     def infer(chat_id, revision, prompt=None, markup=None):
         try:
             snapshot = db.get(chat_id)
@@ -116,6 +146,7 @@ def create_app(store=None):
             chat = db.get(chat_id) or {'id': chat_id, 'name': name[:80], 'telegram_id': telegram_id, 'mode': 'ai', 'state': 'interesado', 'summary': 'Conversación nueva', 'messages': [], 'revision': 0, 'updates': [], 'pending': False, 'error': None}
             if update_id and update_id in chat['updates']:
                 return chat
+            release_if_idle(chat)
             if update_id:
                 chat['updates'] = (chat['updates'] + [update_id])[-100:]
             if telegram_id:
@@ -183,7 +214,7 @@ def create_app(store=None):
                 threading.Thread(target=infer, args=(chat_id, chat['revision']), daemon=True).start()
             return chat
 
-    app.extensions.update(store=db, receive=receive, infer=infer)
+    app.extensions.update(store=db, receive=receive, infer=infer, expire_handovers=expire_handovers)
 
     @app.before_request
     def protect():
@@ -299,6 +330,8 @@ def create_app(store=None):
         rows = db.all()
         for chat in rows:
             chat['summary'] = operator_summary.summarize(chat, current_catalog())
+            for registration in chat.get('registrations', []):
+                registration['receipt_available'] = bool(registration.pop('receipt_pdf', None))
         return jsonify(sorted(rows, key=lambda chat: chat['updated_at'], reverse=True))
 
     @app.get('/api/courses')
@@ -371,6 +404,8 @@ def create_app(store=None):
             row = enrollment.confirm(chat, course)
             row['source'] = 'dashboard'
             row['registered_by'] = session.get('operator_name', 'Administrador')
+            if chat['mode'] == 'human':
+                chat['operator_last_activity'] = time.time()
             append(chat, 'operator', f"Solicitud {row['id']} registrada para {course['titulo']}. Estado: pendiente de pago.")
             chat['state'] = 'caliente'
             save(chat)
@@ -393,30 +428,42 @@ def create_app(store=None):
 
     @app.post('/api/chats/<chat_id>/registrations/<registration_id>/paid')
     def confirm_payment(chat_id, registration_id):
-        reference = str((request.get_json(silent=True) or {}).get('reference', '')).strip()
-        if not reference or len(reference) > 120:
-            return jsonify(error='Ingresa una referencia de recibo de hasta 120 caracteres'), 400
         with chat_lock(chat_id):
             chat = db.get(chat_id)
             row = next((r for r in (chat or {}).get('registrations', []) if r['id'] == registration_id), None)
             if not row:
                 return jsonify(error='Inscripción inexistente'), 404
-            if row['status'] == 'paid':
-                return jsonify(registration=row, notified=None)
-            row.update(status='paid', paid_at=now(), payment_reference=reference, confirmed_by=session.get('operator_name', 'Administrador'))
-            row.setdefault('audit', []).append({'action': 'payment_confirmed', 'at': row['paid_at'], 'actor': row['confirmed_by'], 'reference': reference, 'price': dict(row.get('price') or {})})
-            save(chat)
-            notice = f"Tu pago fue confirmado por el equipo para {row['course_title']}. Solicitud: {row['id']}. Conserva tu comprobante."
-            notified = True
-            try:
-                deliver(chat, notice)
-                append(chat, 'operator', notice)
+            if not row.get('receipt_pdf'):
+                candidate = dict(row)
+                candidate.update(status='paid', paid_at=row.get('paid_at') or now(), confirmed_by=row.get('confirmed_by') or session.get('operator_name', 'Administrador'), receipt_number='CTT-'+datetime.now(timezone.utc).strftime('%Y%m%d')+'-'+secrets.token_hex(4).upper())
+                pdf = receipts.build(candidate)
+                row.update(candidate, payment_reference=candidate['receipt_number'], receipt_pdf=base64.b64encode(pdf).decode(), receipt_delivery='pending' if chat.get('telegram_id') else 'not_linked')
+                row.setdefault('audit', []).append({'action':'payment_receipt_issued','at':now(),'actor':session.get('operator_name','Administrador'),'receipt':row['receipt_number'],'price':dict(row.get('price') or {})})
+                append(chat, 'operator', 'Pago confirmado. Comprobante generado: '+row['receipt_number'])
+                if chat['mode'] == 'human':
+                    chat['operator_last_activity'] = time.time()
                 save(chat)
-            except Exception:
-                notified = False
-                chat['error'] = 'El pago quedó confirmado, pero falló el aviso por Telegram. Contacta al estudiante.'
+            notified = None
+            if chat.get('telegram_id') and row.get('receipt_delivery') != 'sent':
+                try:
+                    telegram.send_document(chat['telegram_id'], base64.b64decode(row['receipt_pdf']), row['receipt_number']+'.pdf')
+                    row['receipt_delivery'] = 'sent'
+                    notified = True
+                    chat['error'] = None
+                except Exception:
+                    row['receipt_delivery'] = 'failed'
+                    notified = False
+                    chat['error'] = 'Comprobante guardado y pago confirmado. Falló el envío del PDF; puedes reintentarlo.'
                 save(chat)
-            return jsonify(registration=row, notified=notified)
+            return jsonify(registration={k:v for k,v in row.items() if k!='receipt_pdf'}, notified=notified)
+
+    @app.get('/api/chats/<chat_id>/registrations/<registration_id>/receipt')
+    def download_receipt(chat_id, registration_id):
+        chat = db.get(chat_id)
+        row = next((r for r in (chat or {}).get('registrations',[]) if r['id']==registration_id),None)
+        if not row or not row.get('receipt_pdf'):
+            return jsonify(error='Todavía no hay comprobante generado'),404
+        return Response(base64.b64decode(row['receipt_pdf']),mimetype='application/pdf',headers={'Content-Disposition':'attachment; filename="'+row['receipt_number']+'.pdf"'})
 
     @app.post('/api/demo')
     def demo():
@@ -440,6 +487,7 @@ def create_app(store=None):
                 return jsonify(error='Conversación inexistente'), 404
             chat.update(mode=value, revision=chat['revision'] + 1, pending=False)
             if value == 'human':
+                chat['operator_last_activity'] = time.time()
                 chat['waiting_for_advisor'] = False
                 chat['absence_notified'] = False
             save(chat)
@@ -455,6 +503,7 @@ def create_app(store=None):
             if not chat:
                 return jsonify(error='Conversación inexistente'), 404
             chat.update(mode='human', revision=chat['revision'] + 1, pending=False)
+            chat['operator_last_activity'] = time.time()
             chat['waiting_for_advisor'] = False
             chat['absence_notified'] = False
             save(chat)
@@ -501,4 +550,12 @@ if __name__ == '__main__':
     if os.getenv('TELEGRAM_BOT_TOKEN'):
         telegram.configure()
         telegram.start_polling(app.extensions['receive'])
+    def handover_monitor():
+        while True:
+            try:
+                app.extensions['expire_handovers']()
+            except Exception:
+                app.logger.warning('No se pudo comprobar la inactividad de operadores.')
+            time.sleep(10)
+    threading.Thread(target=handover_monitor,daemon=True,name='handover-monitor').start()
     serve(app, host=host, port=int(os.getenv('PORT', '5000')), threads=24)

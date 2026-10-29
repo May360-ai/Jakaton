@@ -42,7 +42,7 @@ class EnrollmentTests(unittest.TestCase):
         self.assertFalse(route(chat, 'Hola', [COURSE])['infer'])
 
     def test_persist_registration_payment_and_auth(self):
-        with patch.dict(os.environ, {'DASHBOARD_PASSWORD': 'secret'}), patch('backend.telegram.send') as send, patch('backend.agents.answer') as answer:
+        with patch.dict(os.environ, {'DASHBOARD_PASSWORD': 'secret'}), patch('backend.telegram.send') as send, patch('backend.telegram.send_document'), patch('backend.agents.answer') as answer:
             store = Store(':memory:')
             with patch.object(store, 'courses', return_value=[COURSE]):
                 app = create_app(store)
@@ -59,10 +59,10 @@ class EnrollmentTests(unittest.TestCase):
             url = f"/api/chats/tg-1/registrations/{row['id']}/paid"
             self.assertEqual(client.post(url, json={'reference': 'REC-1'}).status_code, 401)
             client.post('/api/login', json={'password': 'secret'})
-            self.assertEqual(client.post(url, json={}).status_code, 400)
+            self.assertEqual(client.post('/api/chats/tg-1/registrations/missing/paid', json={}).status_code, 404)
             result = client.post(url, json={'reference': 'REC-1'})
             self.assertEqual(result.json['registration']['status'], 'paid')
-            self.assertEqual(store.get('tg-1')['registrations'][0]['payment_reference'], 'REC-1')
+            self.assertEqual(store.get('tg-1')['registrations'][0]['receipt_number'], result.json['registration']['receipt_number'])
             count = send.call_count
             client.post(url, json={'reference': 'REC-1'})
             self.assertEqual(send.call_count, count)

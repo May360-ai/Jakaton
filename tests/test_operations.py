@@ -13,6 +13,8 @@ class OperationsTests(unittest.TestCase):
     def setUp(self):
         self.env = patch.dict(os.environ, {'DASHBOARD_PASSWORD':'master-test','GEMINI_API_KEY':'test'})
         self.env.start()
+        self.documents = patch('backend.telegram.send_document')
+        self.documents.start()
         self.store = Store(':memory:')
         self.app = create_app(self.store)
         self.client = self.app.test_client()
@@ -20,6 +22,7 @@ class OperationsTests(unittest.TestCase):
 
     def tearDown(self):
         self.store.db.close()
+        self.documents.stop()
         self.env.stop()
 
     def course(self, title, amount='120.00'):

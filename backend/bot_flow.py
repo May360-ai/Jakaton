@@ -117,6 +117,27 @@ def route(chat, text, courses, action=None):
     if action is None and (chat.pop('awaiting_question', False) or chat.get('bot_chat')) and not clean.startswith('/'):
         result.update(infer=True, markup=None)
         return result
+    if action is None and clean and not clean.startswith('/') and clean not in ['hola','gracias','ok','listo','menu','cursos','ver cursos','inscribirme','ayuda']:
+        selected = next((c for c in courses if c['id'] == chat.get('selected_course')), None)
+        if selected:
+            cid = str(selected['id'])
+            if any(word in clean for word in ['ensena','ensenar','aprende','aprender','contenido','temario','que se ve']):
+                action = 'content:' + cid
+            elif any(word in clean for word in ['precio','cuesta','costo','valor']):
+                action = 'enroll:' + cid
+            elif any(word in clean for word in ['horario','duracion','cuanto dura','modalidad','presencial','virtual']):
+                action = 'schedule:' + cid
+            elif any(word in clean for word in ['requisito','necesito saber','certificado','materiales']):
+                action = 'requirements:' + cid
+            elif any(word in clean for word in ['quiero inscrib','como me inscrib','registrarme']):
+                action = 'register:' + cid
+            else:
+                chat['bot_chat'] = True
+                result.update(infer=True,markup=course_keyboard(selected))
+                return result
+        elif any(word in clean for word in ['que ','como ','por que','puedo ','explica','duda','?']):
+            result.update(infer=True,markup=home_keyboard())
+            return result
     if action is None:
         if clean in ['/inscribirme', 'inscribirme']:
             action = 'enrollments'
