@@ -1,19 +1,19 @@
-﻿id,titulo,estado,duracion,enlace
-1,INTRODUCCIÓN A LAS REDES – PREPARACIÓN CCNA,ABIERTO,70 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso16.php
-2,PREPARACIÓN LINUX ESSENTIALS CERTIFICATE,ABIERTO,70 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso17.php
-3,FUNDAMENTOS DE PYTHON 1,ABIERTO,32 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso18.php
-4,GITHUB CERTIFIED: AGENTIC AI DEVELOPER (GH-600),ABIERTO,32 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso19.php
-5,PREPARACIÓN ARDUINO CERTIFICATION PROGRAM,ABIERTO,32 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso20.php
-6,FUNDAMENTOS DE PYTHON 2,ABIERTO,40 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso21.php
-7,"ARDUINO DESDE CERO: ELECTRÓNICA, PROGRAMACIÓN Y AUTOMATIZACIÓN",ABIERTO,40 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso13.php
-8,INTELIGENCIA ARTIFICIAL PARA LA GESTIÓN DE RECURSOS HUMANOS,ABIERTO,32 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso15.php
-9,LA LEY DE PROTECCIÓN DE DATOS EN EL ECUADOR,ABIERTO,32 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso14.php
-10,ADMINISTRACIÓN Y DEFENSA DE AMENAZAS CIBERNÉTICAS,ABIERTO,50 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso9.php
-11,FUNDAMENTOS DE PYTHON 1,CERRADO,32 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso1.php
-12,Fundamentos de Python 2,CERRADO,40 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso2.php
-13,JavaScript Essentials 1,CERRADO,40 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso3.php
-14,JavaScript Essentials 2,CERRADO,50 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso4.php
-15,FUNDAMENTOS DE CIENCIA Y ANALÍTICA DE DATOS,CERRADO,32 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso5.php
-16,ETHICAL HACKER,CERRADO,70 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso6.php
-17,CONCEPTOS BÁSICOS DE REDES,CERRADO,32 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso7.php
-18,CIBERSEGURIDAD EN DISPOSITIVOS FINALES,CERRADO,40 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso8.php
+﻿id,titulo,estado,duracion,enlace,imagen
+1,INTRODUCCIÓN A LAS REDES – PREPARACIÓN CCNA,ABIERTO,70 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso16.php,https://ctt-talleresfisei.uta.edu.ec/img/curso16.jpg
+2,PREPARACIÓN LINUX ESSENTIALS CERTIFICATE,ABIERTO,70 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso17.php,https://ctt-talleresfisei.uta.edu.ec/img/curso17.jpg
+3,FUNDAMENTOS DE PYTHON 1,ABIERTO,32 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso18.php,https://ctt-talleresfisei.uta.edu.ec/img/curso18.jpg
+4,GITHUB CERTIFIED: AGENTIC AI DEVELOPER (GH-600),ABIERTO,32 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso19.php,https://ctt-talleresfisei.uta.edu.ec/img/curso19.jpg
+5,PREPARACIÓN ARDUINO CERTIFICATION PROGRAM,ABIERTO,32 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso20.php,https://ctt-talleresfisei.uta.edu.ec/img/curso20.jpg
+6,FUNDAMENTOS DE PYTHON 2,ABIERTO,40 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso21.php,https://ctt-talleresfisei.uta.edu.ec/img/curso21.jpg
+7,"ARDUINO DESDE CERO: ELECTRÓNICA, PROGRAMACIÓN Y AUTOMATIZACIÓN",ABIERTO,40 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso13.php,https://ctt-talleresfisei.uta.edu.ec/img/arduino.png
+8,INTELIGENCIA ARTIFICIAL PARA LA GESTIÓN DE RECURSOS HUMANOS,ABIERTO,32 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso15.php,https://ctt-talleresfisei.uta.edu.ec/img/ia_rrhh.jpg
+9,LA LEY DE PROTECCIÓN DE DATOS EN EL ECUADOR,ABIERTO,32 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso14.php,https://ctt-talleresfisei.uta.edu.ec/img/proteccion_datos.jpg
+10,ADMINISTRACIÓN Y DEFENSA DE AMENAZAS CIBERNÉTICAS,ABIERTO,50 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso9.php,https://ctt-talleresfisei.uta.edu.ec/img/ethical_img.jpg
+11,FUNDAMENTOS DE PYTHON 1,CERRADO,32 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso1.php,https://ctt-talleresfisei.uta.edu.ec/img/python1.jpg
+12,Fundamentos de Python 2,CERRADO,40 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso2.php,https://ctt-talleresfisei.uta.edu.ec/img/python2.jpg
+13,JavaScript Essentials 1,CERRADO,40 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso3.php,https://ctt-talleresfisei.uta.edu.ec/img/javascript1.jpg
+14,JavaScript Essentials 2,CERRADO,50 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso4.php,https://ctt-talleresfisei.uta.edu.ec/img/javascript2.jpg
+15,FUNDAMENTOS DE CIENCIA Y ANALÍTICA DE DATOS,CERRADO,32 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso5.php,https://ctt-talleresfisei.uta.edu.ec/img/analisis-de-datos.jpg
+16,ETHICAL HACKER,CERRADO,70 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso6.php,https://ctt-talleresfisei.uta.edu.ec/img/EthicalHacker.jpeg
+17,CONCEPTOS BÁSICOS DE REDES,CERRADO,32 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso7.php,https://ctt-talleresfisei.uta.edu.ec/img/conRedes.jpg
+18,CIBERSEGURIDAD EN DISPOSITIVOS FINALES,CERRADO,40 HORAS,https://ctt-talleresfisei.uta.edu.ec/curso8.php,https://ctt-talleresfisei.uta.edu.ec/img/segDisp.jpg

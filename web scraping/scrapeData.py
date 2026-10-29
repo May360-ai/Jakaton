@@ -4,10 +4,11 @@ import urllib3
 from bs4 import BeautifulSoup
 import requests
 
-# Deshabilitar advertencias si la web de la universidad tiene certificados SSL intermedios incompletos
+# Deshabilitar advertencias SSL
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-URL = "https://ctt-talleresfisei.uta.edu.ec/course.php"
+BASE_URL = "https://ctt-talleresfisei.uta.edu.ec"
+URL = f"{BASE_URL}/course.php"
 
 headers = {
     "User-Agent": (
@@ -23,15 +24,15 @@ def scrapear_cursos():
     response = requests.get(URL, headers=headers, verify=False, timeout=15)
     response.raise_for_status()
   except requests.RequestException as e:
-    print(f"Error al conectar con la página: {e}")
+    print(f"Error al conectar con la pagina: {e}")
     return []
 
   soup = BeautifulSoup(response.text, "html.parser")
   cursos = []
 
-  # La estructura real de cada tarjeta es:
+  # La estructura real de cada tarjeta:
   #   div.rounded > a[img aria-label="TITULO"] + div.bg-secondary > div[ABIERTO/HORAS] + a.h5[titulo]
-  # Buscamos los divs internos con estado y horas (el nivel más interno), luego subimos al padre.
+  # Buscamos los divs internos con estado y horas (nivel mas interno), luego subimos al padre.
   inner_cards = soup.find_all(
       lambda tag: tag.name == "div"
       and (
@@ -40,7 +41,7 @@ def scrapear_cursos():
       and "HORAS" in tag.get_text()
   )
 
-  # Filtramos los elementos más internos (sin hijos que también cumplan la condición)
+  # Filtramos los elementos mas internos
   contenedores = []
   for card in inner_cards:
     sub_cards = card.find_all(
@@ -49,23 +50,23 @@ def scrapear_cursos():
         and "HORAS" in t.get_text()
     )
     if not sub_cards:
-      # Subimos al contenedor padre real (div.rounded que tiene imagen + datos)
+      # El div interno es "bg-secondary p-4", su padre es "div.rounded" que tiene la <img>
       padre = card.parent if card.parent else card
-      contenedores.append(padre)
+      abuelo = padre.parent if padre.parent else padre
+      contenedores.append(abuelo)
 
   print(f"Se encontraron {len(contenedores)} tarjetas detectadas.\n")
 
   for i, contenedor in enumerate(contenedores, 1):
-    # --- Título: buscar el <a class="h5"> ---
+    # --- Titulo: <a class="h5"> ---
     titulo_elem = contenedor.find("a", class_="h5")
     if titulo_elem:
       titulo = titulo_elem.get_text(strip=True)
     else:
-      # Fallback: aria-label del enlace de la imagen
       img_link = contenedor.find("a", attrs={"aria-label": True})
       titulo = img_link["aria-label"] if img_link else "S/N"
 
-    # --- Estado (ABIERTO / CERRADO) ---
+    # --- Estado ---
     texto_completo = contenedor.get_text()
     if "ABIERTO" in texto_completo:
       estado = "ABIERTO"
@@ -74,7 +75,7 @@ def scrapear_cursos():
     else:
       estado = "NO DEFINIDO"
 
-    # --- Duración en horas ---
+    # --- Duracion ---
     lineas = [l.strip() for l in texto_completo.split("\n") if l.strip()]
     horas = next((t for t in lineas if "HORA" in t.upper()), "N/D")
 
@@ -82,9 +83,17 @@ def scrapear_cursos():
     link_elem = contenedor.find("a", class_="h5", href=True)
     if not link_elem:
       link_elem = contenedor.find("a", href=True)
-    enlace = link_elem["href"] if link_elem else "https://ctt-talleresfisei.uta.edu.ec/"
+    enlace = link_elem["href"] if link_elem else f"{BASE_URL}/"
     if enlace and not enlace.startswith("http"):
-      enlace = f"https://ctt-talleresfisei.uta.edu.ec/{enlace.lstrip('/')}"
+      enlace = f"{BASE_URL}/{enlace.lstrip('/')}"
+
+    # --- Imagen del curso ---
+    img_elem = contenedor.find("img")
+    if img_elem and img_elem.get("src"):
+      src = img_elem["src"]
+      imagen = src if src.startswith("http") else f"{BASE_URL}/{src.lstrip('/')}"
+    else:
+      imagen = ""
 
     curso_data = {
         "id": i,
@@ -92,9 +101,10 @@ def scrapear_cursos():
         "estado": estado,
         "duracion": horas,
         "enlace": enlace,
+        "imagen": imagen,
     }
     cursos.append(curso_data)
-    print(f"[{estado}] {titulo} | {horas}")
+    print(f"[{estado}] {titulo} | {horas} | img: {imagen}")
 
   return cursos
 

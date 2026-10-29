@@ -4,125 +4,143 @@
         "titulo": "INTRODUCCIÓN A LAS REDES – PREPARACIÓN CCNA",
         "estado": "ABIERTO",
         "duracion": "70 HORAS",
-        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso16.php"
+        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso16.php",
+        "imagen": "https://ctt-talleresfisei.uta.edu.ec/img/curso16.jpg"
     },
     {
         "id": 2,
         "titulo": "PREPARACIÓN LINUX ESSENTIALS CERTIFICATE",
         "estado": "ABIERTO",
         "duracion": "70 HORAS",
-        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso17.php"
+        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso17.php",
+        "imagen": "https://ctt-talleresfisei.uta.edu.ec/img/curso17.jpg"
     },
     {
         "id": 3,
         "titulo": "FUNDAMENTOS DE PYTHON 1",
         "estado": "ABIERTO",
         "duracion": "32 HORAS",
-        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso18.php"
+        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso18.php",
+        "imagen": "https://ctt-talleresfisei.uta.edu.ec/img/curso18.jpg"
     },
     {
         "id": 4,
         "titulo": "GITHUB CERTIFIED: AGENTIC AI DEVELOPER (GH-600)",
         "estado": "ABIERTO",
         "duracion": "32 HORAS",
-        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso19.php"
+        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso19.php",
+        "imagen": "https://ctt-talleresfisei.uta.edu.ec/img/curso19.jpg"
     },
     {
         "id": 5,
         "titulo": "PREPARACIÓN ARDUINO CERTIFICATION PROGRAM",
         "estado": "ABIERTO",
         "duracion": "32 HORAS",
-        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso20.php"
+        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso20.php",
+        "imagen": "https://ctt-talleresfisei.uta.edu.ec/img/curso20.jpg"
     },
     {
         "id": 6,
         "titulo": "FUNDAMENTOS DE PYTHON 2",
         "estado": "ABIERTO",
         "duracion": "40 HORAS",
-        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso21.php"
+        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso21.php",
+        "imagen": "https://ctt-talleresfisei.uta.edu.ec/img/curso21.jpg"
     },
     {
         "id": 7,
         "titulo": "ARDUINO DESDE CERO: ELECTRÓNICA, PROGRAMACIÓN Y AUTOMATIZACIÓN",
         "estado": "ABIERTO",
         "duracion": "40 HORAS",
-        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso13.php"
+        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso13.php",
+        "imagen": "https://ctt-talleresfisei.uta.edu.ec/img/arduino.png"
     },
     {
         "id": 8,
         "titulo": "INTELIGENCIA ARTIFICIAL PARA LA GESTIÓN DE RECURSOS HUMANOS",
         "estado": "ABIERTO",
         "duracion": "32 HORAS",
-        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso15.php"
+        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso15.php",
+        "imagen": "https://ctt-talleresfisei.uta.edu.ec/img/ia_rrhh.jpg"
     },
     {
         "id": 9,
         "titulo": "LA LEY DE PROTECCIÓN DE DATOS EN EL ECUADOR",
         "estado": "ABIERTO",
         "duracion": "32 HORAS",
-        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso14.php"
+        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso14.php",
+        "imagen": "https://ctt-talleresfisei.uta.edu.ec/img/proteccion_datos.jpg"
     },
     {
         "id": 10,
         "titulo": "ADMINISTRACIÓN Y DEFENSA DE AMENAZAS CIBERNÉTICAS",
         "estado": "ABIERTO",
         "duracion": "50 HORAS",
-        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso9.php"
+        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso9.php",
+        "imagen": "https://ctt-talleresfisei.uta.edu.ec/img/ethical_img.jpg"
     },
     {
         "id": 11,
         "titulo": "FUNDAMENTOS DE PYTHON 1",
         "estado": "CERRADO",
         "duracion": "32 HORAS",
-        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso1.php"
+        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso1.php",
+        "imagen": "https://ctt-talleresfisei.uta.edu.ec/img/python1.jpg"
     },
     {
         "id": 12,
         "titulo": "Fundamentos de Python 2",
         "estado": "CERRADO",
         "duracion": "40 HORAS",
-        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso2.php"
+        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso2.php",
+        "imagen": "https://ctt-talleresfisei.uta.edu.ec/img/python2.jpg"
     },
     {
         "id": 13,
         "titulo": "JavaScript Essentials 1",
         "estado": "CERRADO",
         "duracion": "40 HORAS",
-        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso3.php"
+        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso3.php",
+        "imagen": "https://ctt-talleresfisei.uta.edu.ec/img/javascript1.jpg"
     },
     {
         "id": 14,
         "titulo": "JavaScript Essentials 2",
         "estado": "CERRADO",
         "duracion": "50 HORAS",
-        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso4.php"
+        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso4.php",
+        "imagen": "https://ctt-talleresfisei.uta.edu.ec/img/javascript2.jpg"
     },
     {
         "id": 15,
         "titulo": "FUNDAMENTOS DE CIENCIA Y ANALÍTICA DE DATOS",
         "estado": "CERRADO",
         "duracion": "32 HORAS",
-        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso5.php"
+        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso5.php",
+        "imagen": "https://ctt-talleresfisei.uta.edu.ec/img/analisis-de-datos.jpg"
     },
     {
         "id": 16,
         "titulo": "ETHICAL HACKER",
         "estado": "CERRADO",
         "duracion": "70 HORAS",
-        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso6.php"
+        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso6.php",
+        "imagen": "https://ctt-talleresfisei.uta.edu.ec/img/EthicalHacker.jpeg"
     },
     {
         "id": 17,
         "titulo": "CONCEPTOS BÁSICOS DE REDES",
         "estado": "CERRADO",
         "duracion": "32 HORAS",
-        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso7.php"
+        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso7.php",
+        "imagen": "https://ctt-talleresfisei.uta.edu.ec/img/conRedes.jpg"
     },
     {
         "id": 18,
         "titulo": "CIBERSEGURIDAD EN DISPOSITIVOS FINALES",
         "estado": "CERRADO",
         "duracion": "40 HORAS",
-        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso8.php"
+        "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso8.php",
+        "imagen": "https://ctt-talleresfisei.uta.edu.ec/img/segDisp.jpg"
     }
 ]
