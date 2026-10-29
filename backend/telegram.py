@@ -36,6 +36,7 @@ def configure():
         {'command': 'cursos', 'description': 'Explorar cursos y contenido'},
         {'command': 'asesor', 'description': 'Solicitar atención humana'},
         {'command': 'ayuda', 'description': 'Preguntas frecuentes'},
+        {'command': 'bot', 'description': 'Conversar con el asistente automático'},
     ]})
     call('setChatMenuButton', {'menu_button': {'type': 'commands'}})
 

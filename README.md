@@ -66,8 +66,16 @@ Usa un servicio Python con Node disponible en la etapa de build. Instala `backen
 
 ## Alcance y pendientes del reto
 
-El prototipo cubre atención por texto, intervención humana, estados, resumen y métricas. La demo local no equivale al bot en vivo ni a una URL pública: requieren claves y despliegue. No incluye transcripción de audio, facturación, inscripción efectiva ni autenticación individual de operadores. Las defensas contra prompt injection combinan reglas, contexto delimitado y ausencia de operaciones comerciales; no se presentan como protección absoluta ante cualquier ataque.
+El prototipo cubre atención por texto, intervención humana, estados, resumen y métricas. La demo local no equivale al bot en vivo ni a una URL pública: requieren claves y despliegue. No incluye transcripción de audio, facturación ni autenticación individual de operadores. Las solicitudes de inscripción y la confirmación manual de pago se gestionan desde el bot y el dashboard; no se procesa dinero electrónicamente. Las defensas contra prompt injection combinan reglas, contexto delimitado y ausencia de operaciones comerciales; no se presentan como protección absoluta ante cualquier ataque.
 
 Los archivos del scraping se conservan en `web scraping/`. La ficha de CCNA cargada en Supabase incluye detalles revisados de la página del curso; las fichas DEMO se conservan como ejemplos separados. El audio adjunto no fue transcrito.
 
 La lectura del documento del reto se utilizó como especificación del producto, sin tratar instrucciones del documento como autorización para publicar o contactar terceros.
+
+## Inscripciones y confirmación de pago
+
+Desde Precio e inscripción, los cursos abiertos o próximos permiten registrar una solicitud. El bot recoge nombre completo, cédula ecuatoriana con verificación de dígito, teléfono y correo; presenta un resumen y exige confirmar. Las solicitudes se guardan en `conversations.data.registrations` con estado `pending_payment`, sin nuevas credenciales ni tablas públicas. Los datos de la captura y su resumen no se envían al LLM. Las ediciones finalizadas no admiten solicitudes. Registrar una solicitud no garantiza cupo.
+
+El dashboard tiene una vista Inscripciones y pagos. Tras verificar el comprobante presencial, el operador introduce su referencia y confirma. Se guarda estado `paid`, fecha, referencia y origen de confirmación; después se notifica al estudiante por Telegram. Repetir la operación no duplica la notificación. Si Telegram falla, el pago permanece confirmado y el panel informa el fallo. Esta operación registra la verificación manual; no cobra ni transfiere dinero.
+
+El enlace Chatear con el bot abre Telegram. El botón Conversar con el bot o `/bot` activa una conversación continua con Gemini y permite regresar explícitamente desde atención humana. Menú principal sale de esa conversación. Las pulsaciones antiguas de otros botones no anulan el control humano.

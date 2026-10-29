@@ -3,6 +3,7 @@ from urllib.parse import urlparse
 from datetime import datetime, timedelta, timezone
 
 from backend.agents import normalized, triage
+from backend import enrollment
 
 
 def button(label, action):
@@ -16,6 +17,8 @@ def keyboard(*rows):
 def home_keyboard():
     return keyboard([button('📚 Ver cursos', 'courses:0')],
                     [button('🧭 Ayúdame a elegir', 'guide')],
+                    [button('🤖 Conversar con el bot', 'bot_chat')],
+                    [button('🧾 Mis inscripciones', 'registrations')],
                     [button('❓ Preguntas frecuentes', 'faq'), button('👤 Hablar con asesor', 'human')])
 
 
@@ -50,12 +53,36 @@ def route(chat, text, courses, action=None):
     state, handover = triage(text)
     result = {'text': '', 'markup': home_keyboard(), 'infer': False, 'handover': False, 'state': state}
     clean = normalized(text.strip())
+    if action == 'cancel_registration' or clean == '/cancelar':
+        chat.pop('registration_draft', None)
+        result['text'] = 'Solicitud cancelada. Puedes volver a elegir un curso.'
+        return result
+    if chat.get('registration_draft') and action is None and not clean.startswith('/'):
+        result['text'], ready = enrollment.collect(chat, text)
+        result['markup'] = keyboard([button('✅ Confirmar solicitud', 'confirm_registration')], [button('Cancelar', 'cancel_registration')]) if ready else keyboard([button('Cancelar', 'cancel_registration')])
+        return result
+    if action == 'confirm_registration':
+        draft = chat.get('registration_draft') or {}
+        course = next((c for c in courses if c['id'] == draft.get('course_id')), None)
+        row = enrollment.confirm(chat, course) if course else None
+        result['text'] = (f"Solicitud {row['id']} registrada para {row['course_title']}.\nEstado: PENDIENTE DE PAGO.\nAcércate al CTT-FISEI, Campus Huachi, para verificar disponibilidad y realizar el pago de tu inscripción. El equipo confirmará el pago en el sistema. No realices pagos por este chat.\nTu cupo y la apertura de la edición deben ser confirmados por el centro." if row else 'Esta solicitud ya fue procesada o venció. Consulta Mis inscripciones.')
+        result['state'] = 'caliente'
+        return result
+    if action == 'registrations':
+        rows = chat.get('registrations', [])
+        result['text'] = '\n\n'.join(f"{r['course_title']}\nCódigo: {r['id']}\nEstado: {'Pago confirmado' if r['status'] == 'paid' else 'Pendiente de pago'}" for r in rows) or 'Todavía no tienes solicitudes registradas.'
+        return result
+    if action == 'bot_chat' or clean == '/bot':
+        chat.pop('registration_draft', None)
+        chat['bot_chat'] = True
+        result.update(text='Ya puedes conversar con el asistente. Escribe tu pregunta; usaré el catálogo para responder. Para volver a los botones, pulsa Menú principal.', markup=keyboard([button('🏠 Menú principal', 'home')], [button('👤 Solicitar asesor', 'human')]))
+        return result
     if handover or action == 'human' or clean == '/asesor':
         chat['awaiting_question'] = False
         result.update(text='Te paso con un asesor. La atención automática queda pausada; no necesitas repetir tu consulta.', handover=True,
                       markup=None)
         return result
-    if action is None and (chat.pop('awaiting_question', False)) and not clean.startswith('/'):
+    if action is None and (chat.pop('awaiting_question', False) or chat.get('bot_chat')) and not clean.startswith('/'):
         result.update(infer=True, markup=None)
         return result
     if action is None:
@@ -66,6 +93,8 @@ def route(chat, text, courses, action=None):
         else:
             action = 'home'
     root, _, arg = action.partition(':')
+    chat.pop('registration_draft', None)
+    chat['bot_chat'] = False
     chat['awaiting_question'] = False
     if root == 'home':
         result['text'] = '¡Hola! Soy el asistente de capacitación FISEI. Puedes consultar todo desde los botones. ¿Qué te gustaría hacer?'
@@ -101,7 +130,7 @@ def route(chat, text, courses, action=None):
                    'enroll': 'Selecciona un curso y pulsa «Precio e inscripción». Solo aparecerá un enlace si está cargado y el curso está abierto. Esto no confirma una matrícula ni un pago.',
                    'schedule': 'Los horarios y la modalidad deben estar confirmados en el catálogo. Si no están publicados, puedes pedirlos al asesor.'}
         result['text'] = answers.get(arg, 'Elige una opción del menú.')
-    elif root in ['course', 'content', 'schedule', 'enroll', 'requirements', 'explain', 'ask']:
+    elif root in ['course', 'content', 'schedule', 'enroll', 'register', 'requirements', 'explain', 'ask']:
         content_page = 0
         if root == 'content' and ':' in arg:
             arg, page = arg.split(':', 1)
@@ -119,7 +148,15 @@ def route(chat, text, courses, action=None):
         details = course.get('details') or {}
         title = course['titulo'][:150]
         result['markup'] = course_keyboard(course)
-        if root == 'course':
+        if root == 'register':
+            if course.get('estado') not in ['ABIERTO', 'PRÓXIMAMENTE']:
+                result['text'] = 'Esta edición no admite solicitudes: sus fechas terminaron o faltan datos de apertura. Selecciona un curso próximo o abierto.'
+            elif any(r['course_id'] == course['id'] for r in chat.get('registrations', [])):
+                result['text'] = 'Ya tienes una solicitud para este curso. Consulta Mis inscripciones en el menú.'
+            else:
+                result['text'] = enrollment.begin(chat, course)
+                result['markup'] = keyboard([button('Cancelar', 'cancel_registration')])
+        elif root == 'course':
             result['text'] = f"{title}\n\nDuración: {course.get('duracion') or 'Por confirmar'}\nEstado: {course.get('estado') or 'Por confirmar'}\n\n¿Qué quieres consultar?" + note
         elif root == 'content':
             modules = details.get('modulos', [])
@@ -154,6 +191,8 @@ def route(chat, text, courses, action=None):
             not_started = bool(details.get('registration_start') and details['registration_start'] > today)
             can_enroll = can_enroll and not expired and not not_started
             rows = [[button('👤 Confirmar con un asesor', 'human')], [button('↩️ Volver al curso', 'course:' + arg)]]
+            if course.get('estado') in ['ABIERTO', 'PRÓXIMAMENTE'] and not expired:
+                rows.insert(0, [button('📝 Registrar solicitud · pendiente de pago', 'register:' + arg)])
             if can_enroll:
                 rows.insert(0, [{'text': '📝 Abrir inscripción oficial', 'url': link}])
             prices = details.get('precios', [])

@@ -77,6 +77,7 @@ def create_app(store=None):
     def infer(chat_id, revision, prompt=None, markup=None):
         try:
             snapshot = db.get(chat_id)
+            snapshot['messages'] = [m for m in snapshot['messages'] if not m.get('private')]
             if prompt:
                 snapshot['messages'].append({'role': 'user', 'text': prompt})
             reference = bot_flow.available(current_catalog()) if snapshot.get('telegram_id') else current_catalog()
@@ -111,18 +112,23 @@ def create_app(store=None):
                 chat['updates'] = (chat['updates'] + [update_id])[-100:]
             if telegram_id:
                 text = bot_flow.label(action, current_catalog()) if action is not None else text
+            collecting = bool(chat.get('registration_draft'))
             append(chat, 'user', text[:4000])
+            if collecting:
+                chat['messages'][-1]['private'] = True
             state, handover = agents.triage(text)
             chat['state'] = state
             chat['revision'] += 1
             if telegram_id:
                 chat['pending'] = False
+                if action == 'bot_chat' or text.strip().lower() == '/bot':
+                    chat['mode'] = 'ai'
                 if chat['mode'] == 'human':
                     save(chat)
                     return chat
                 flow = bot_flow.route(chat, text, current_catalog(), action)
                 chat['state'] = flow['state']
-                chat['summary'] = f"Curso: {chat.get('selected_course', 'sin seleccionar')}. Perfil: {chat.get('profile', {})}. Última acción: {text[:200]}"
+                chat['summary'] = f"Curso: {chat.get('selected_course', 'sin seleccionar')}. Perfil: {chat.get('profile', {})}. Última acción: {'Datos de inscripción recibidos' if collecting else text[:200]}"
                 chat['mode'] = 'human' if flow['handover'] else 'ai'
                 chat['pending'] = flow['infer']
                 save(chat)
@@ -132,6 +138,8 @@ def create_app(store=None):
                     try:
                         deliver(chat, flow['text'], flow['markup'])
                         append(chat, 'assistant', flow['text'])
+                        if collecting or chat.get('registration_draft'):
+                            chat['messages'][-1]['private'] = True
                         chat['error'] = None
                     except Exception:
                         chat.update(mode='human', error='No se pudo entregar la respuesta por Telegram. Requiere atención humana.')
@@ -194,6 +202,36 @@ def create_app(store=None):
     @app.get('/api/courses')
     def courses():
         return jsonify(current_catalog())
+
+    @app.get('/api/bot')
+    def bot_info():
+        return jsonify(url='https://t.me/' + os.getenv('TELEGRAM_BOT_USERNAME', 'FISEI_CTT_26_Bot'))
+
+    @app.post('/api/chats/<chat_id>/registrations/<registration_id>/paid')
+    def confirm_payment(chat_id, registration_id):
+        reference = str((request.get_json(silent=True) or {}).get('reference', '')).strip()
+        if not reference or len(reference) > 120:
+            return jsonify(error='Ingresa una referencia de recibo de hasta 120 caracteres'), 400
+        with chat_lock(chat_id):
+            chat = db.get(chat_id)
+            row = next((r for r in (chat or {}).get('registrations', []) if r['id'] == registration_id), None)
+            if not row:
+                return jsonify(error='Inscripción inexistente'), 404
+            if row['status'] == 'paid':
+                return jsonify(registration=row, notified=None)
+            row.update(status='paid', paid_at=now(), payment_reference=reference, confirmed_by='dashboard_operator')
+            save(chat)
+            notice = f"Tu pago fue confirmado por el equipo para {row['course_title']}. Solicitud: {row['id']}. Conserva tu comprobante."
+            notified = True
+            try:
+                deliver(chat, notice)
+                append(chat, 'operator', notice)
+                save(chat)
+            except Exception:
+                notified = False
+                chat['error'] = 'El pago quedó confirmado, pero falló el aviso por Telegram. Contacta al estudiante.'
+                save(chat)
+            return jsonify(registration=row, notified=notified)
 
     @app.post('/api/demo')
     def demo():
