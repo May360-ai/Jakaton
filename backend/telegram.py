@@ -34,6 +34,7 @@ def configure():
     call('setMyCommands', {'commands': [
         {'command': 'start', 'description': 'Abrir el menú principal'},
         {'command': 'cursos', 'description': 'Explorar cursos y contenido'},
+        {'command': 'inscribirme', 'description': 'Inscribirme directamente desde el bot'},
         {'command': 'asesor', 'description': 'Solicitar atención humana'},
         {'command': 'ayuda', 'description': 'Preguntas frecuentes'},
         {'command': 'bot', 'description': 'Conversar con el asistente automático'},

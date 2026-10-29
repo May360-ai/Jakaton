@@ -72,6 +72,7 @@ def parse_course(html, url, today):
     if not details.get('requisitos'):
         details['requisitos'] = 'La ficha oficial no especifica conocimientos previos. Esto no equivale a confirmar que no existan requisitos.'
     details['materiales'] = [re.sub(r'^[•·\s]+', '', item) for item in details['materiales']]
+    details['requisitos_detalles_texto'] = panel.get_text('\n', strip=True) if panel else ''
     if panel:
         for li in panel.select('li'):
             value = li.get_text(' ', strip=True)

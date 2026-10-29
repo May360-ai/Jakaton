@@ -16,6 +16,7 @@ def keyboard(*rows):
 
 def home_keyboard():
     return keyboard([button('📚 Ver cursos', 'courses:0')],
+                    [button('📝 Inscribirme en un curso', 'enrollments')],
                     [button('🧭 Ayúdame a elegir', 'guide')],
                     [button('🤖 Conversar con el bot', 'bot_chat')],
                     [button('🧾 Mis inscripciones', 'registrations')],
@@ -25,6 +26,7 @@ def home_keyboard():
 def course_keyboard(course):
     cid = str(course['id'])
     rows = [[button('📖 Contenido', 'content:' + cid), button('🕒 Duración y disponibilidad', 'schedule:' + cid)],
+            [button('📝 Inscribirme aquí', 'register:' + cid)],
             [button('💳 Precio e inscripción', 'enroll:' + cid)],
             [button('✅ Requisitos y certificado', 'requirements:' + cid)],
             [button('❓ Tengo una duda (IA)', 'ask:' + cid)],
@@ -33,7 +35,7 @@ def course_keyboard(course):
 
 
 def available(courses):
-    valid = [c for c in courses if c.get('titulo') and c['titulo'].strip().upper() != 'S/N']
+    valid = [c for c in courses if c.get('titulo') and c['titulo'].strip().upper() != 'S/N' and c.get('estado') != 'ARCHIVADO']
     real = [c for c in valid if not c.get('is_demo') and c.get('estado') != 'DEMO']
     return real or valid
 
@@ -86,7 +88,9 @@ def route(chat, text, courses, action=None):
         result.update(infer=True, markup=None)
         return result
     if action is None:
-        if clean in ['/cursos', 'cursos', 'ver cursos']:
+        if clean in ['/inscribirme', 'inscribirme']:
+            action = 'enrollments'
+        elif clean in ['/cursos', 'cursos', 'ver cursos']:
             action = 'courses:0'
         elif clean in ['/ayuda', '/help', 'ayuda']:
             action = 'faq'
@@ -98,6 +102,10 @@ def route(chat, text, courses, action=None):
     chat['awaiting_question'] = False
     if root == 'home':
         result['text'] = '¡Hola! Soy el asistente de capacitación FISEI. Puedes consultar todo desde los botones. ¿Qué te gustaría hacer?'
+    elif root == 'enrollments':
+        eligible = [c for c in courses if c.get('estado') in ['ABIERTO', 'PRÓXIMAMENTE']]
+        result['text'] = 'Selecciona un curso para inscribirte desde este chat. Tu solicitud quedará pendiente de pago.' if eligible else 'No hay ediciones abiertas o próximas que admitan inscripción. Puedes explorar el catálogo o consultar al centro.'
+        result['markup'] = keyboard(*[[button(c['titulo'][:55], 'register:' + str(c['id']))] for c in eligible[:30]], [button('🏠 Menú principal', 'home')])
     elif root == 'courses':
         try:
             page = max(0, min(int(arg), max(0, (len(courses) - 1) // 6)))
@@ -132,7 +140,7 @@ def route(chat, text, courses, action=None):
         result['text'] = answers.get(arg, 'Elige una opción del menú.')
     elif root in ['course', 'content', 'schedule', 'enroll', 'register', 'requirements', 'explain', 'ask']:
         content_page = 0
-        if root == 'content' and ':' in arg:
+        if root in ['content', 'requirements'] and ':' in arg:
             arg, page = arg.split(':', 1)
             try:
                 content_page = max(0, int(page))
@@ -180,7 +188,17 @@ def route(chat, text, courses, action=None):
         elif root == 'schedule':
             result['text'] = f"{title}\n\nDuración: {course.get('duracion') or 'Por confirmar'}\nEstado: {course.get('estado') or 'Por confirmar'}\nModalidad: {details.get('modalidad', 'Por confirmar')}\nFechas del curso: {details.get('course_start', 'Por confirmar')} al {details.get('course_end', 'Por confirmar')}\n\nHorario: {details.get('horario', 'Consultar con el asesor')}\n\nLugar: {details.get('lugar', 'Por confirmar')}" + note
         elif root == 'requirements':
-            result['text'] = title + '\n\nConocimientos previos:\n' + details.get('requisitos', 'No especificados en la ficha oficial. Consulta al centro antes de inscribirte.') + '\n\nMateriales y equipos:\n' + ('\n'.join('• ' + item for item in details.get('materiales', [])) or 'No especificados en la ficha oficial.') + '\n\nCertificado:\n' + details.get('certificado', 'No especificado en la ficha oficial.') + note
+            full = (details.get('requisitos_detalles_texto') or 'Conocimientos previos:\n' + details.get('requisitos', 'No especificados en la ficha oficial.')) + '\n\nMateriales y equipos:\n' + ('\n'.join('• ' + item for item in details.get('materiales', [])) or 'No especificados en la ficha oficial.')
+            pages = [full[i:i+2800] for i in range(0, len(full), 2800)]
+            content_page = min(content_page, len(pages)-1)
+            result['text'] = title + f'\n\nRequisitos y detalles ({content_page+1}/{len(pages)})\n' + pages[content_page] + note
+            nav = []
+            if content_page:
+                nav.append(button('← Anterior', f'requirements:{arg}:{content_page-1}'))
+            if content_page+1 < len(pages):
+                nav.append(button('Más requisitos →', f'requirements:{arg}:{content_page+1}'))
+            if nav:
+                result['markup']['inline_keyboard'].insert(0, nav)
         elif root == 'enroll':
             result['state'] = 'caliente'
             link = details.get('registration_url') or course.get('enlace') or ''

@@ -47,6 +47,7 @@
         "Computador personal",
         "Conexión a internet"
       ],
+      "requisitos": "La ficha oficial no especifica conocimientos previos. Esto no equivale a confirmar que no existan requisitos.",
       "source_url": "https://ctt-talleresfisei.uta.edu.ec/curso1.php",
       "certificado": "Certificado digital de asistencia y aprobación.",
       "course_start": "2025-03-01",
@@ -65,11 +66,11 @@
       "registration_end": "2025-03-02",
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "Del 01 de marzo al 30 de marzo de 2025",
+      "requisitos_estado": "no_especificado",
       "source_checked_on": "2026-10-29",
       "registration_start": "2025-02-15",
       "registration_dates_text": "15 de febrero al 02 de marzo de 2025",
-      "requisitos_estado": "no_especificado",
-      "requisitos": "La ficha oficial no especifica conocimientos previos. Esto no equivale a confirmar que no existan requisitos."
+      "requisitos_detalles_texto": "Fechas de inscripciones:\n15 de febrero al 02 de marzo de 2025\nEl cupo de inscripciones:\nIlimitado\nLugar del evento:\nVirtual a través de la plataforma CISCO.\nFecha del curso:\nDel 01 de marzo al 30 de marzo de 2025\nHorario:\nA elección del participante\nPrecio para los asistentes:\n30 USD Estudiantes UTA (Último periodo)\n40 USD Graduados, Docentes y Administrativos UTA\n50 USD Público en general\nTipo de capacitación:\nCertificado digital de asistencia y aprobación.\nHoras de capacitación:\n32 horas\nBeneficiarios:\nEstudiantes, graduados, docentes y público en general\nModalidad:\nVirtual auto-didacta (Self-paced)"
     }
   },
   {
@@ -114,6 +115,7 @@
         "Computador personal.",
         "Conexión a internet."
       ],
+      "requisitos": "La ficha oficial no especifica conocimientos previos. Esto no equivale a confirmar que no existan requisitos.",
       "source_url": "https://ctt-talleresfisei.uta.edu.ec/curso2.php",
       "certificado": "Certificado digital de asistencia y aprobación con validación QR.",
       "course_start": "2025-04-05",
@@ -132,11 +134,11 @@
       "registration_end": "2025-04-07",
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "Del 05 de abril al 04 de mayo del 2025",
+      "requisitos_estado": "no_especificado",
       "source_checked_on": "2026-10-29",
       "registration_start": "2025-03-15",
       "registration_dates_text": "Del 15 de marzo al 07 de abril de 2025.",
-      "requisitos_estado": "no_especificado",
-      "requisitos": "La ficha oficial no especifica conocimientos previos. Esto no equivale a confirmar que no existan requisitos."
+      "requisitos_detalles_texto": "Fechas de inscripciones:\nDel 15 de marzo al 07 de abril de 2025.\nEl cupo de inscripciones:\nIlimitado\nLugar del evento:\nVirtual a través de la plataforma CISCO.\nFecha del curso:\nDel 05 de abril al 04 de mayo del 2025\nHorario:\nA elección del participante\nPrecio para los asistentes:\n30 Estudiantes UTA (Último periodo)\n40 USD Graduados, Docentes y Administrativos UTA\n50 USD Público en general\nTipo de capacitación:\nCertificado digital de asistencia y aprobación con validación QR.\nHoras de capacitación:\n40 horas\nBeneficiarios:\nEstudiantes, graduados, docentes y público en general\nModalidad:\nCurso virtual auto-didacta (Self-paced)"
     }
   },
   {
@@ -197,10 +199,11 @@
       "registration_end": "2025-03-03",
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "01-marzo a 31-marzo-2025.",
+      "requisitos_estado": "publicado",
       "source_checked_on": "2026-10-29",
       "registration_start": "2025-02-17",
       "registration_dates_text": "Del 17 de febrero al 03 de marzo de 2025.",
-      "requisitos_estado": "publicado"
+      "requisitos_detalles_texto": "Fechas de inscripciones:\nDel 17 de febrero al 03 de marzo de 2025.\nFecha del curso:\n01-marzo a 31-marzo-2025.\nHorario:\nCurso virtual auto-didacta (Self-paced)\nPrecio:\n30 USD Estudiantes UTA\n40 USD Graduados, Docentes y Administrativos UTA\n50 USD Público en general\nHoras de capacitación:\n40 horas\nModalidad:\nVirtual - eLearning\nConocimientos previos:\nNinguno"
     }
   },
   {
@@ -257,9 +260,10 @@
       },
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "05-abril a 04-mayo-2025",
+      "requisitos_estado": "publicado",
       "source_checked_on": "2026-10-29",
       "registration_dates_text": "",
-      "requisitos_estado": "publicado"
+      "requisitos_detalles_texto": "Modalidad:\nCurso virtual auto-didacta (Self-paced)\nHoras de capacitación:\n50 horas\nFecha del curso:\n05-abril a 04-mayo-2025\nPeríodo de inscripción:\n01-marzo a 08-abril-2025\nPrecio:\n40 USD Estudiantes UTA\n50 USD Graduados, Docentes y Administrativos UTA\n60 USD Público en general\nConocimientos previos:\nJavaScript."
     }
   },
   {
@@ -316,9 +320,10 @@
       },
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "01-marzo a 30-marzo-2025",
+      "requisitos_estado": "publicado",
       "source_checked_on": "2026-10-29",
       "registration_dates_text": "",
-      "requisitos_estado": "publicado"
+      "requisitos_detalles_texto": "Modalidad:\nCurso virtual auto-didacta (Self-paced)\nHoras de capacitación:\n36 horas\nFecha del curso:\n01-marzo a 30-marzo-2025\nPeríodo de inscripción:\n14-febrero a 03-marzo-2025\nPrecio:\n30 USD Estudiantes UTA\n40 USD Graduados, Docentes y Administrativos UTA\n50 USD Público en general\nConocimientos previos:\nNivel de inglés básico.\nDirigido a:\nEstudiantes, graduados, docentes UTA, y público en general."
     }
   },
   {
@@ -379,9 +384,10 @@
       },
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "5-abril a 18-mayo-2025",
+      "requisitos_estado": "publicado",
       "source_checked_on": "2026-10-29",
       "registration_dates_text": "",
-      "requisitos_estado": "publicado"
+      "requisitos_detalles_texto": "Modalidad:\nMOOC\nHoras de capacitación:\n70 horas\nFecha del curso:\n5-abril a 18-mayo-2025\nPeríodo de inscripción:\n10-marzo a 08-abril-2025\nPrecio:\n50 USD Estudiantes UTA\n60 USD Graduados, Docentes y Administrativos UTA\n70 USD Público en general\nConocimientos previos:\nConocimientos básicos de ciberseguridad\nConocimientos básicos de programación\nConocimiento del idioma inglés"
     }
   },
   {
@@ -450,9 +456,10 @@
       },
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "19-abril a 18-mayo-2025",
+      "requisitos_estado": "publicado",
       "source_checked_on": "2026-10-29",
       "registration_dates_text": "",
-      "requisitos_estado": "publicado"
+      "requisitos_detalles_texto": "Modalidad:\nPresencial\nHoras de capacitación:\n32 horas\nFecha del curso:\n19-abril a 18-mayo-2025\nPeríodo de inscripción:\n20-marzo al 22-abril-2025\nPrecio:\n30 USD Estudiantes UTA (actuales)\n40 USD Graduados, Docentes y Administrativos UTA\n50 USD Público en general\nConocimientos previos:\nNinguno\nTOTAL:\n32 horas"
     }
   },
   {
@@ -513,10 +520,11 @@
       "registration_end": "2025-05-20",
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "Del 17-mayo al 15-junio-2025",
+      "requisitos_estado": "publicado",
       "source_checked_on": "2026-10-29",
       "registration_start": "2025-04-20",
       "registration_dates_text": "Del 20 de abril al 20 de mayo de 2025",
-      "requisitos_estado": "publicado"
+      "requisitos_detalles_texto": "Fechas de inscripciones:\nDel 20 de abril al 20 de mayo de 2025\nEl cupo de inscripciones:\nMínimo 15, Máximo 25\nFecha del curso:\nDel 17-mayo al 15-junio-2025\nPrecio para los asistentes:\n30 USD Estudiantes UTA\n40 USD Graduados, Docentes y Administrativos UTA\n50 USD Público en general\nTipo de capacitación:\nCurso con certificado digital QR\nHoras de capacitación:\n40 horas\nBeneficiarios:\nEstudiantes y público en general\nModalidad:\nVirtual\nConocimientos previos:\nNinguno"
     }
   },
   {
@@ -596,10 +604,11 @@
       "registration_end": "2025-06-03",
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "Del 31-mayo al 05-julio-2025",
+      "requisitos_estado": "publicado",
       "source_checked_on": "2026-10-29",
       "registration_start": "2025-05-01",
       "registration_dates_text": "Del 01 de mayo al 03 de junio de 2025",
-      "requisitos_estado": "publicado"
+      "requisitos_detalles_texto": "Fechas de inscripciones:\nDel 01 de mayo al 03 de junio de 2025\nLugar del evento:\nPlataforma: Virtual, plataforma:CISCO\nFecha del curso:\nDel 31-mayo al 05-julio-2025\nHorario:\nCurso MOOC desarrollado en el aula virtual de los talleres tecnológicos, sin horarios específicos de conexión.\nPrecio para los asistentes:\n40 USD Estudiantes UTA (Último periodo)\n50 USD Graduados, Docentes y Administrativos UTA\n60 USD Público en general\nTipo de capacitación:\nCurso MOOC - certificado digital de aprobación con validación QR\nHoras de capacitación:\n50 horas\nBeneficiarios:\nEstudiantes y público en general\nModalidad:\nMOOC\nConocimientos previos:\nConocimientos básicos de ciberseguridad.\nConocimientos básicos de redes"
     }
   },
   {
@@ -696,10 +705,11 @@
       "registration_end": "2025-06-04",
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "Del 07 al 30 de junio de 2025",
+      "requisitos_estado": "publicado",
       "source_checked_on": "2026-10-29",
       "registration_start": "2025-05-19",
       "registration_dates_text": "Del 19 de mayo al 04 de junio de 2025",
-      "requisitos_estado": "publicado"
+      "requisitos_detalles_texto": "Fechas de inscripciones:\nDel 19 de mayo al 04 de junio de 2025\nEl cupo de inscripciones:\nMínimo 15, máximo 25 participantes\nLugar del evento:\nLaboratorio asignado - FISEI\nFecha del curso:\nDel 07 al 30 de junio de 2025\nHorario:\n8:00 - 14:00 (Sábados)\nPrecio para los asistentes:\n40 USD Estudiantes UTA (Último periodo)\n50 USD Graduados, Docentes y Administrativos UTA\n60 USD Público en general\nTipo de capacitación:\nCertificado digital de asistencia y aprobación con validación QR\nHoras de capacitación:\n40 horas (24 presenciales, 16 trabajo autónomo)\nBeneficiarios:\nEstudiantes, graduados, docentes y público en general\nModalidad:\nPresencial\nConocimientos previos:\n• Ninguno"
     }
   },
   {
@@ -772,10 +782,11 @@
       "registration_end": "2025-06-04",
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "Del 07 al 30 de junio de 2025",
+      "requisitos_estado": "publicado",
       "source_checked_on": "2026-10-29",
       "registration_start": "2025-05-15",
       "registration_dates_text": "Del 15 de Mayo al 04 de Junio de 2025",
-      "requisitos_estado": "publicado"
+      "requisitos_detalles_texto": "Fechas de inscripciones:\nDel 15 de Mayo al 04 de Junio de 2025\nEl cupo de inscripciones:\nMínimo 15, máximo 20 participantes\nLugar del evento:\nCTT – FISEI / Laboratorio asignado\nFecha del curso:\nDel 07 al 30 de junio de 2025\nHorario:\n8:00 - 13:00 (Sábados)\nPrecio para los asistentes:\n40 USD Estudiantes UTA (Último periodo)\n50 USD Graduados, Docentes y Administrativos UTA\n60 USD Público en general\nTipo de capacitación:\nCertificado digital de asistencia y aprobación con validación QR\nHoras de capacitación:\n32 horas (20 presenciales, 12 trabajo autónomo)\nBeneficiarios:\nEstudiantes, graduados, docentes y público en general\nModalidad:\nPresencial\nConocimientos previos:\n• Ninguno"
     }
   },
   {
@@ -847,10 +858,11 @@
       "registration_end": "2025-06-03",
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "Del 04 al 30 de junio de 2025",
+      "requisitos_estado": "publicado",
       "source_checked_on": "2026-10-29",
       "registration_start": "2025-05-14",
       "registration_dates_text": "Del 14 de Mayo al 03 de Junio de 2025",
-      "requisitos_estado": "publicado"
+      "requisitos_detalles_texto": "Fechas de inscripciones:\nDel 14 de Mayo al 03 de Junio de 2025\nEl cupo de inscripciones:\nSin límite específico\nLugar del evento:\nVirtual\nFecha del curso:\nDel 04 al 30 de junio de 2025\nHorario:\n7:00 PM - 10:00 PM (Miércoles y Jueves)\nPrecio para los asistentes:\n40 USD Estudiantes UTA (Último periodo)\n60 USD Graduados, Docentes y Administrativos UTA\n80 USD Público en general\nTipo de capacitación:\nCertificado digital de asistencia y aprobación con validación QR\nHoras de capacitación:\n32 horas (21 sincrónicas, 11 trabajo autónomo)\nBeneficiarios:\nEstudiantes, graduados, docentes y público en general\nModalidad:\nVirtual\nConocimientos previos:\n• Ninguno"
     }
   },
   {
@@ -937,10 +949,11 @@
       "registration_end": "2026-10-15",
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "Del 16 de octubre de 2026 al 05 de diciembre de 2026",
+      "requisitos_estado": "publicado",
       "source_checked_on": "2026-10-29",
       "registration_start": "2026-10-01",
       "registration_dates_text": "Del 01 de octubre de 2026 al 15 de octubre de 2026",
-      "requisitos_estado": "publicado"
+      "requisitos_detalles_texto": "Fechas de inscripciones:\nDel 01 de octubre de 2026 al 15 de octubre de 2026\nCupo de inscripciones:\nMínimo 5, máximo 20\nLugar del evento:\nTalleres Tecnológicos FISEI, Campus Huachi, Ambato; sesiones virtuales según cronograma.\nFecha del curso:\nDel 16 de octubre de 2026 al 05 de diciembre de 2026\nHorario:\nSesiones virtuales los viernes de 19:00 a 21:00 y sesiones presenciales los sábados de 08:00 a 13:00, más trabajo autónomo, según la planificación.\nPrecio para los asistentes:\nEstudiantes UTA (hasta último período): $120,00\nGraduados, docentes y personal administrativo UTA: $150,00\nPúblico en general: $180,00\nTipo de capacitación:\nCertificado digital de aprobación con validación QR.\nHoras de capacitación:\n70 horas\nBeneficiarios:\nEstudiantes, graduados, docentes y público en general\nModalidad:\nHíbrida\nConocimientos previos:\nNinguno.\nEl certificado de este curso de preparación no significa obtener automáticamente la certificación internacional externa."
     }
   },
   {
@@ -1024,10 +1037,11 @@
       "registration_end": "2026-10-15",
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "Del 16 de octubre de 2026 al 05 de diciembre de 2026",
+      "requisitos_estado": "publicado",
       "source_checked_on": "2026-10-29",
       "registration_start": "2026-10-01",
       "registration_dates_text": "Del 01 de octubre de 2026 al 15 de octubre de 2026",
-      "requisitos_estado": "publicado"
+      "requisitos_detalles_texto": "Fechas de inscripciones:\nDel 01 de octubre de 2026 al 15 de octubre de 2026\nCupo de inscripciones:\nMínimo 5, sin cupo máximo especificado\nLugar del evento:\nVirtual, plataforma Cisco NetAcad.\nFecha del curso:\nDel 16 de octubre de 2026 al 05 de diciembre de 2026\nHorario:\nModalidad autodidacta; el participante avanza en la plataforma dentro del período de ejecución.\nPrecio para los asistentes:\nEstudiantes UTA (hasta último período): $40,00\nGraduados, docentes y personal administrativo UTA: $50,00\nPúblico en general: $60,00\nTipo de capacitación:\nCertificado digital de aprobación con validación QR.\nHoras de capacitación:\n70 horas\nBeneficiarios:\nEstudiantes, graduados, docentes y público en general\nModalidad:\nVirtual autodidacta (Self-paced)\nConocimientos previos:\nNinguno.\nEl certificado de este curso de preparación no significa obtener automáticamente la certificación internacional externa."
     }
   },
   {
@@ -1124,10 +1138,11 @@
       "registration_end": "2026-10-15",
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "Del 16 de octubre de 2026 al 16 de noviembre de 2026",
+      "requisitos_estado": "publicado",
       "source_checked_on": "2026-10-29",
       "registration_start": "2026-10-01",
       "registration_dates_text": "Del 01 de octubre de 2026 al 15 de octubre de 2026",
-      "requisitos_estado": "publicado"
+      "requisitos_detalles_texto": "Fechas de inscripciones:\nDel 01 de octubre de 2026 al 15 de octubre de 2026\nCupo de inscripciones:\nMínimo 5, sin cupo máximo especificado\nLugar del evento:\nVirtual, plataforma Cisco NetAcad.\nFecha del curso:\nDel 16 de octubre de 2026 al 16 de noviembre de 2026\nHorario:\nModalidad autodidacta; actividades y evaluaciones en línea.\nPrecio para los asistentes:\nEstudiantes UTA (hasta último período): $40,00\nGraduados, docentes y personal administrativo UTA: $50,00\nPúblico en general: $60,00\nTipo de capacitación:\nCertificado digital de asistencia y aprobación con validación QR.\nHoras de capacitación:\n32 horas\nBeneficiarios:\nEstudiantes, graduados, docentes y público en general\nModalidad:\nVirtual autodidacta (Self-paced)\nConocimientos previos:\nNinguno.\nEl certificado de este curso de preparación no significa obtener automáticamente la certificación internacional externa."
     }
   },
   {
@@ -1216,10 +1231,11 @@
       "registration_end": "2026-11-13",
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "Del 14 de noviembre de 2026 al 05 de diciembre de 2026",
+      "requisitos_estado": "publicado",
       "source_checked_on": "2026-10-29",
       "registration_start": "2026-10-30",
       "registration_dates_text": "Del 30 de octubre de 2026 al 13 de noviembre de 2026",
-      "requisitos_estado": "publicado"
+      "requisitos_detalles_texto": "Fechas de inscripciones:\nDel 30 de octubre de 2026 al 13 de noviembre de 2026\nCupo de inscripciones:\nMínimo 5, máximo 25\nLugar del evento:\nVirtual por Zoom.\nFecha del curso:\nDel 14 de noviembre de 2026 al 05 de diciembre de 2026\nHorario:\nSesiones virtuales el 14, 21 y 28 de noviembre y el 5 de diciembre de 2026, de 08:00 a 14:00; 24 horas de clase y 8 de trabajo autónomo.\nPrecio para los asistentes:\nEstudiantes UTA (hasta último período): $40,00\nGraduados, docentes y personal administrativo UTA: $50,00\nPúblico en general: $60,00\nTipo de capacitación:\nCertificado digital de asistencia y aprobación con validación QR.\nHoras de capacitación:\n32 horas\nBeneficiarios:\nEstudiantes, graduados, docentes y público en general\nModalidad:\nVirtual\nConocimientos previos:\nConocimientos básicos de programación y manejo de computador. No se requiere experiencia previa con IA agéntica, MCP ni GitHub Copilot.\nEl certificado de este curso de preparación no significa obtener automáticamente la certificación internacional externa."
     }
   },
   {
@@ -1337,10 +1353,11 @@
       "registration_end": "2026-11-13",
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "Del 14 de noviembre de 2026 al 05 de diciembre de 2026",
+      "requisitos_estado": "publicado",
       "source_checked_on": "2026-10-29",
       "registration_start": "2026-10-30",
       "registration_dates_text": "Del 30 de octubre de 2026 al 13 de noviembre de 2026",
-      "requisitos_estado": "publicado"
+      "requisitos_detalles_texto": "Fechas de inscripciones:\nDel 30 de octubre de 2026 al 13 de noviembre de 2026\nCupo de inscripciones:\nMínimo 5, máximo 30\nLugar del evento:\nTalleres de Innovación y Desarrollo Tecnológico FISEI, Campus Huachi, Ambato.\nFecha del curso:\nDel 14 de noviembre de 2026 al 05 de diciembre de 2026\nHorario:\nClases presenciales los días 14, 21 y 28 de noviembre y 5 de diciembre de 2026. Confirmar el horario exacto con la coordinación.\nPrecio para los asistentes:\nEstudiantes UTA (hasta último período): $40,00\nGraduados, docentes y personal administrativo UTA: $50,00\nPúblico en general: $60,00\nTipo de capacitación:\nCertificado digital de asistencia y aprobación emitido por FISEI-UTA, con validación QR.\nHoras de capacitación:\n32 horas\nBeneficiarios:\nEstudiantes, graduados, docentes y público en general\nModalidad:\nPresencial\nConocimientos previos:\nConocimientos básicos de matemáticas y manejo general de herramientas informáticas.\nEl certificado de este curso de preparación no significa obtener automáticamente la certificación internacional externa."
     }
   },
   {
@@ -1432,10 +1449,11 @@
       "registration_end": "2026-11-15",
       "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
       "course_dates_text": "Del 16 de noviembre de 2026 al 16 de diciembre de 2026",
+      "requisitos_estado": "publicado",
       "source_checked_on": "2026-10-29",
       "registration_start": "2026-10-30",
       "registration_dates_text": "Del 30 de octubre de 2026 al 15 de noviembre de 2026",
-      "requisitos_estado": "publicado"
+      "requisitos_detalles_texto": "Fechas de inscripciones:\nDel 30 de octubre de 2026 al 15 de noviembre de 2026\nCupo de inscripciones:\nMínimo 5, sin cupo máximo especificado\nLugar del evento:\nVirtual, plataforma Cisco NetAcad.\nFecha del curso:\nDel 16 de noviembre de 2026 al 16 de diciembre de 2026\nHorario:\nModalidad autodidacta; el participante completa los módulos en línea dentro de las fechas establecidas.\nPrecio para los asistentes:\nEstudiantes UTA (hasta último período): $40,00\nGraduados, docentes y personal administrativo UTA: $50,00\nPúblico en general: $60,00\nTipo de capacitación:\nCertificado digital de asistencia y aprobación con validación QR.\nHoras de capacitación:\n40 horas\nBeneficiarios:\nEstudiantes, graduados, docentes y público en general\nModalidad:\nVirtual autodidacta (Self-paced)\nConocimientos previos:\nNinguno indicado en la planificación. Se recomienda haber cursado Fundamentos de Python 1 por la progresión de contenidos.\nEl certificado de este curso de preparación no significa obtener automáticamente la certificación internacional externa."
     }
   }
 ]

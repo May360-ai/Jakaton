@@ -81,3 +81,11 @@ Desde Precio e inscripción, los cursos abiertos o próximos permiten registrar 
 El dashboard tiene una vista Inscripciones y pagos. Tras verificar el comprobante presencial, el operador introduce su referencia y confirma. Se guarda estado `paid`, fecha, referencia y origen de confirmación; después se notifica al estudiante por Telegram. Repetir la operación no duplica la notificación. Si Telegram falla, el pago permanece confirmado y el panel informa el fallo. Esta operación registra la verificación manual; no cobra ni transfiere dinero.
 
 El enlace Chatear con el bot abre Telegram. El botón Conversar con el bot o `/bot` activa una conversación continua con Gemini y permite regresar explícitamente desde atención humana. Menú principal sale de esa conversación. Las pulsaciones antiguas de otros botones no anulan el control humano.
+
+## Gestión desde el dashboard
+
+En Catálogo de cursos hay búsqueda por nombre, descripción o modalidad, filtro por estado, creación y edición. El editor permite modificar requisitos completos, conocimientos previos, materiales, contenidos, fechas, tarifas y datos de la ficha. Archivar conserva las inscripciones existentes y oculta el curso en Telegram. Las modificaciones se guardan en Supabase y actualizan el catálogo del bot.
+
+En Inscripciones está el formulario Inscribir persona, con validación compartida con Telegram y prevención de duplicados por cédula y curso. Se puede buscar por nombre, cédula, teléfono, correo o curso y filtrar pendientes y pagados. Las ediciones abiertas o próximas aceptan solicitudes; las finalizadas requieren una nueva edición o una corrección explícita del administrador.
+
+Telegram ofrece Inscribirme en un curso en el menú, /inscribirme y un botón directo en cada ficha. Requisitos y detalles ahora reproduce la sección completa de la página fuente, incluidos beneficiarios, cupo, fechas y certificación, además de los materiales. Los textos largos se paginan sin recurrir a la IA.

@@ -12,7 +12,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from flask import Flask, Response, jsonify, request, send_from_directory, session
 
-from backend import agents, telegram, bot_flow
+from backend import agents, telegram, bot_flow, enrollment
 from backend.store import Store
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -32,7 +32,7 @@ def now():
 def create_app(store=None):
     app = Flask(__name__, static_folder=str(ROOT / 'frontend/dist'), static_url_path='/assets-unused')
     app.secret_key = os.getenv('SESSION_SECRET') or secrets.token_hex(32)
-    app.config.update(MAX_CONTENT_LENGTH=16384, SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE='Strict')
+    app.config.update(MAX_CONTENT_LENGTH=131072, SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE='Strict')
     db = store or Store()
     catalog = db.courses(COURSES)
     catalog_updated = time.monotonic()
@@ -121,7 +121,7 @@ def create_app(store=None):
             chat['revision'] += 1
             if telegram_id:
                 chat['pending'] = False
-                if action == 'bot_chat' or text.strip().lower() == '/bot':
+                if action in ['bot_chat', 'enrollments'] or (action or '').startswith('register:') or text.strip().lower() in ['/bot', '/inscribirme']:
                     chat['mode'] = 'ai'
                 if chat['mode'] == 'human':
                     save(chat)
@@ -218,6 +218,66 @@ def create_app(store=None):
     @app.get('/api/courses')
     def courses():
         return jsonify(current_catalog())
+
+    @app.post('/api/courses')
+    @app.post('/api/courses/<int:course_id>')
+    def write_course(course_id=None):
+        nonlocal catalog, catalog_updated
+        data = request.get_json(silent=True) or {}
+        if not isinstance(data, dict):
+            return jsonify(error='Datos de curso inválidos'), 400
+        title = str(data.get('titulo', '')).strip()
+        states = ['ABIERTO', 'PRÓXIMAMENTE', 'INSCRIPCIONES FINALIZADAS', 'POR CONFIRMAR', 'ARCHIVADO', 'DEMO']
+        if not title or len(title) > 250 or data.get('estado') not in states:
+            return jsonify(error='Indica un título y estado válidos'), 400
+        details = data.get('details') or {}
+        if not isinstance(details, dict) or any(not isinstance(details.get(k, []), list) for k in ['materiales', 'modulos', 'precios']):
+            return jsonify(error='Los materiales, módulos y precios deben ser listas'), 400
+        if any(not isinstance(item, str) for k in ['materiales', 'modulos'] for item in details.get(k, [])):
+            return jsonify(error='Los materiales y módulos deben ser textos'), 400
+        for key in ['registration_start', 'registration_end', 'course_start', 'course_end']:
+            if details.get(key):
+                try:
+                    datetime.strptime(details[key], '%Y-%m-%d')
+                except (ValueError, TypeError):
+                    return jsonify(error='Las fechas deben tener formato AAAA-MM-DD'), 400
+        if any(not isinstance(p, dict) or not all(isinstance(p.get(k), str) for k in ['perfil', 'valor', 'moneda']) for p in details.get('precios', [])):
+            return jsonify(error='Tarifas inválidas'), 400
+        existing = next((c for c in current_catalog() if c['id'] == course_id), None)
+        if course_id is not None and not existing:
+            return jsonify(error='Curso inexistente'), 404
+        row = {k: data.get(k) for k in ['duracion', 'contenido', 'enlace']}
+        row.update(titulo=title, estado=data['estado'], is_demo=bool(data.get('is_demo')), details={**details, 'last_edited_by': 'dashboard_operator', 'last_edited_at': now()})
+        saved = db.save_course(row, course_id)
+        with catalog_lock:
+            catalog = db.courses(COURSES)
+            catalog_updated = time.monotonic()
+        publish()
+        return jsonify(saved), 200 if course_id else 201
+
+    @app.post('/api/registrations')
+    def manual_registration():
+        data = request.get_json(silent=True) or {}
+        course = next((c for c in current_catalog() if str(c['id']) == str(data.get('course_id'))), None)
+        if not course or course.get('estado') not in ['ABIERTO', 'PRÓXIMAMENTE']:
+            return jsonify(error='Elige una edición abierta o próxima. Puedes gestionar su estado desde Cursos.'), 400
+        import hashlib
+        chat_id = 'manual-' + hashlib.sha256(str(data.get('identification', '')).strip().encode()).hexdigest()[:20]
+        with chat_lock('manual-registrations'):
+            chat = db.get(chat_id) or {'id': chat_id, 'name': str(data.get('name', '')), 'telegram_id': None, 'mode': 'human', 'state': 'caliente', 'messages': [], 'registrations': [], 'revision': 0, 'updates': [], 'pending': False, 'error': None, 'summary': 'Inscripción creada desde el dashboard'}
+            enrollment.begin(chat, course)
+            for key in ['name', 'identification', 'phone', 'email']:
+                before = chat['registration_draft']['step']
+                message, _ = enrollment.collect(chat, str(data.get(key, '')))
+                if not chat.get('registration_draft') or chat['registration_draft']['step'] == before:
+                    return jsonify(error=message), 400
+            for other in db.all():
+                if any(r['course_id'] == course['id'] and r['identification'] == chat['registration_draft']['identification'] for r in other.get('registrations', [])):
+                    return jsonify(error='Esta cédula ya tiene una inscripción para el curso'), 409
+            row = enrollment.confirm(chat, course)
+            row['source'] = 'dashboard'
+            save(chat)
+            return jsonify(registration=row, chat_id=chat_id), 201
 
     @app.get('/api/bot')
     def bot_info():
