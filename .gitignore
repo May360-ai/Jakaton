@@ -37,6 +37,9 @@ htmlcov/
 # descargas/
 # logs/
 *.log
+node_modules/
+frontend/dist/
+*.sqlite3
 
 # ==========================================
 # Archivos de configuración de editores / IDEs

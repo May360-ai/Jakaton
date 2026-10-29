@@ -1,0 +1,1 @@
+{"name":"jakaton-dashboard","private":true,"version":"0.1.0","type":"module","scripts":{"dev":"vite --host 127.0.0.1","build":"vite build"},"dependencies":{"lucide-react":"0.468.0","react":"19.2.0","react-dom":"19.2.0"},"devDependencies":{"vite":"7.3.7"}}
