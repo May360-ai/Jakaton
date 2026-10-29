@@ -60,6 +60,8 @@ class EnrollmentTests(unittest.TestCase):
             self.assertEqual(client.post(url, json={'reference': 'REC-1'}).status_code, 401)
             client.post('/api/login', json={'password': 'secret'})
             self.assertEqual(client.post('/api/chats/tg-1/registrations/missing/paid', json={}).status_code, 404)
+            from backend.payment_proofs import attach
+            saved=app.extensions['store'].get('tg-1');attach(saved['registrations'][0],{'content':'JVBERi0=','mime':'application/pdf'});app.extensions['store'].save(saved)
             result = client.post(url, json={'reference': 'REC-1'})
             self.assertEqual(result.json['registration']['status'], 'paid')
             self.assertEqual(store.get('tg-1')['registrations'][0]['receipt_number'], result.json['registration']['receipt_number'])

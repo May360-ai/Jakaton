@@ -34,6 +34,29 @@ def delete_message(chat_id, message_id):
     return call('deleteMessage', {'chat_id': chat_id, 'message_id': message_id}, timeout=8)
 
 
+def download_proof(file):
+    if file.get('file_size',0)>5*1024*1024:
+        raise ValueError('Envía una imagen o PDF de hasta 5 MB.')
+    metadata=call('getFile',{'file_id':file['file_id']})
+    path=metadata.get('file_path','')
+    if not path or '..' in path:
+        raise ValueError('No se pudo obtener el archivo.')
+    try:
+        with requests.get(f"https://api.telegram.org/file/bot{os.getenv('TELEGRAM_BOT_TOKEN')}/{path}",stream=True,timeout=(8,25)) as response:
+            response.raise_for_status()
+            chunks=[];size=0
+            for chunk in response.iter_content(65536):
+                size+=len(chunk)
+                if size>5*1024*1024:
+                    raise ValueError('El archivo supera 5 MB.')
+                chunks.append(chunk)
+        content=b''.join(chunks)
+        from backend.payment_proofs import pack
+        return {**pack(content),'file_id':file['file_id']}
+    except requests.RequestException:
+        raise ValueError('No pude descargar el comprobante. Vuelve a enviarlo.') from None
+
+
 def send_document(chat_id, data, filename, caption='Tu comprobante de registro de pago. Conserva este PDF.'):
     try:
         response = requests.post(f"https://api.telegram.org/bot{os.getenv('TELEGRAM_BOT_TOKEN')}/sendDocument", data={'chat_id': str(chat_id), 'caption': caption}, files={'document': (filename, data, 'application/pdf')}, timeout=(10,45))
@@ -72,6 +95,10 @@ def dispatch(update, receive):
         return
     message = update.get('message', {})
     if message.get('chat', {}).get('type') == 'private':
+        file=message.get('document') or (message.get('photo') or [None])[-1]
+        if file:
+            receive('tg-'+str(message['chat']['id']),message.get('from',{}).get('first_name','Telegram'),'Archivo de comprobante adjunto',message['chat']['id'],str(update['update_id']),proof_file=file)
+            return
         text = message.get('text') or '/ayuda'
         receive('tg-' + str(message['chat']['id']), message.get('from', {}).get('first_name', 'Telegram'), text, message['chat']['id'], str(update['update_id']))
 

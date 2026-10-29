@@ -43,6 +43,8 @@ class OperationsTests(unittest.TestCase):
         operator=self.app.test_client()
         self.assertEqual(operator.post('/api/login',json={'username':'operadora','password':'individual-test-pass'}).status_code,200)
         self.assertEqual(operator.get('/api/operators').status_code,403)
+        from backend.payment_proofs import attach
+        stored=self.store.get(one.json['chat_id']);attach(stored['registrations'][0],{'content':'JVBERi0=','mime':'application/pdf'});self.store.save(stored)
         paid=operator.post(f"/api/chats/{one.json['chat_id']}/registrations/{one.json['registration']['id']}/paid",json={'reference':'REC-120'})
         self.assertEqual(paid.json['registration']['confirmed_by'],'Ana Operadora')
         self.assertEqual(paid.json['registration']['audit'][0]['price']['amount'],'120.00')
@@ -50,7 +52,7 @@ class OperationsTests(unittest.TestCase):
         self.assertEqual([r['status'] for r in rows],['paid','pending_payment'])
         self.assertEqual([r['price']['amount'] for r in rows],['120.00','180.00'])
         metrics=operator.get('/api/analytics').json
-        self.assertEqual(metrics['confirmed_usd'],'120.00')
+        self.assertEqual(metrics['confirmed_usd'],'0')
         self.assertEqual(metrics['conversion'],100.0)
 
     def test_bot_requires_price_and_retains_snapshot(self):

@@ -13,10 +13,11 @@ class TelegramNavigationTests(unittest.TestCase):
         self.app=create_app(self.store)
         self.receive=self.app.extensions['receive']
         self.send=patch('backend.telegram.send');self.sender=self.send.start()
+        self.docs=patch('backend.telegram.send_document');self.docs.start()
         self.delete=patch('backend.telegram.delete_message');self.deleter=self.delete.start()
 
     def tearDown(self):
-        self.send.stop();self.delete.stop();self.store.db.close();self.env.stop()
+        self.docs.stop();self.send.stop();self.delete.stop();self.store.db.close();self.env.stop()
 
     def test_menu_replaced_only_on_telegram_history_kept_and_restart_safe(self):
         self.sender.return_value={'message_id':10}

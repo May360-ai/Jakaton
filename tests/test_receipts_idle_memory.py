@@ -19,7 +19,7 @@ class ReceiptIdleMemoryTests(unittest.TestCase):
         self.store.db.close();self.env.stop()
 
     def chat(self):
-        return {'id':'tg-1','telegram_id':1,'name':'Ana','mode':'human','state':'caliente','revision':1,'messages':[],'updated_at':'2026-10-29T00:00:00+00:00','operator_last_activity':time.time(),'registrations':[{'id':'reg-1','course_id':1,'course_title':'Fundamentos de Python','name':'Ana Pérez','identification':'1710034065','status':'pending_payment','price':{'category':'Público','amount':'120.00','currency':'USD'},'is_demo':True}]}
+        return {'id':'tg-1','telegram_id':1,'name':'Ana','mode':'human','state':'caliente','revision':1,'messages':[],'updated_at':'2026-10-29T00:00:00+00:00','operator_last_activity':time.time(),'registrations':[{'id':'reg-1','course_id':1,'course_title':'Fundamentos de Python','name':'Ana Pérez','identification':'1710034065','status':'pending_review','proofs':[{'id':'proof-1','status':'received','mime':'application/pdf','content':'JVBERi0='}],'price':{'category':'Público','amount':'120.00','currency':'USD'},'is_demo':True}]}
 
     def test_pdf_saved_private_download_sent_once_and_retry(self):
         self.store.save(self.chat());url='/api/chats/tg-1/registrations/reg-1/paid'
@@ -54,7 +54,7 @@ class ReceiptIdleMemoryTests(unittest.TestCase):
         with patch('backend.receipts.build',side_effect=RuntimeError('render failed')):
             result=self.client.post('/api/chats/tg-1/registrations/reg-1/paid',json={})
         self.assertEqual(result.status_code,502)
-        self.assertEqual(self.store.get('tg-1')['registrations'][0]['status'],'pending_payment')
+        self.assertEqual(self.store.get('tg-1')['registrations'][0]['status'],'pending_review')
 
     def test_operator_message_resets_timer(self):
         chat=self.chat();chat['operator_last_activity']=time.time()-250;self.store.save(chat)

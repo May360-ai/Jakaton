@@ -17,7 +17,7 @@ def summarize(chat, courses):
     if profile.get('goal') in goals:
         parts.append('Objetivo: ' + goals[profile['goal']] + '.')
     if registration:
-        parts.append('Inscripción: ' + ('pago confirmado.' if registration['status'] == 'paid' else 'pendiente de pago.'))
+        parts.append('Inscripción: ' + ('pago confirmado.' if registration['status'] == 'paid' else 'comprobante pendiente de revisión.' if registration['status']=='pending_review' else 'pendiente de pago y comprobante.'))
     elif chat.get('registration_draft'):
         parts.append('Inscripción: está completando sus datos; todavía no confirmada.')
     elif chat.get('state') == 'caliente':
@@ -27,8 +27,10 @@ def summarize(chat, courses):
     candidates = [text for text in candidates if not text.startswith(labels)]
     if candidates:
         parts.append('Última consulta: ' + candidates[-1][:200])
-    if registration and registration['status'] == 'pending_payment':
-        next_step = 'Verificar el comprobante antes de confirmar el pago.'
+    if registration and registration['status'] == 'pending_review':
+        next_step = 'Revisar el archivo del comprobante y validar o rechazar la inscripción.'
+    elif registration and registration['status'] == 'pending_payment':
+        next_step = 'Solicitar una imagen o PDF del comprobante para que el encargado pueda revisarlo.'
     elif chat.get('registration_draft'):
         next_step = 'Ayudar a completar la solicitud de inscripción.'
     elif chat.get('mode') == 'human':

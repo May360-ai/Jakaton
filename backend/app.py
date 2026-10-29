@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 from flask import Flask, Response, jsonify, request, send_from_directory, session
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from backend import agents, telegram, bot_flow, enrollment, operator_summary, receipts
+from backend import agents, telegram, bot_flow, enrollment, operator_summary, receipts, payment_proofs
 from backend.store import Store
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -34,7 +34,7 @@ def now():
 def create_app(store=None):
     app = Flask(__name__, static_folder=str(ROOT / 'frontend/dist'), static_url_path='/assets-unused')
     app.secret_key = os.getenv('SESSION_SECRET') or secrets.token_hex(32)
-    app.config.update(MAX_CONTENT_LENGTH=131072, SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE='Strict')
+    app.config.update(MAX_CONTENT_LENGTH=6*1024*1024, SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE='Strict')
     db = store or Store()
     settings = db.settings()
     catalog = db.courses(COURSES)
@@ -69,6 +69,11 @@ def create_app(store=None):
         chat['updated_at'] = now()
         db.save(chat)
         publish()
+
+    def registration_view(row):
+        result={k:v for k,v in row.items() if k not in ['receipt_pdf','order_pdf']}
+        result['proofs']=[{k:v for k,v in p.items() if k!='content'} for p in row.get('proofs',[])]
+        return result
 
     def append(chat, role, text):
         chat['messages'].append({'id': secrets.token_hex(6), 'role': role, 'text': text, 'at': now()})
@@ -154,7 +159,7 @@ def create_app(store=None):
                     chat.update(mode='human', pending=False, error='No se pudo generar o entregar la respuesta. Requiere atención humana.')
                     save(chat)
 
-    def receive(chat_id, name, text, telegram_id=None, update_id=None, action=None):
+    def receive(chat_id, name, text, telegram_id=None, update_id=None, action=None, proof_file=None):
         with chat_lock(chat_id):
             chat = db.get(chat_id) or {'id': chat_id, 'name': name[:80], 'telegram_id': telegram_id, 'mode': 'ai', 'state': 'interesado', 'summary': 'Conversación nueva', 'messages': [], 'revision': 0, 'updates': [], 'pending': False, 'error': None}
             if update_id and update_id in chat['updates']:
@@ -173,9 +178,38 @@ def create_app(store=None):
             state, handover = agents.triage(text)
             chat['state'] = state
             chat['revision'] += 1
+            if proof_file:
+                chat['pending']=False
+                chat['messages'][-1]['private']=True
+                rows=payment_proofs.eligible(chat)
+                try:
+                    if not rows:
+                        raise ValueError('No hay una inscripción pendiente. Inscríbete antes de enviar el comprobante.')
+                    file=telegram.download_proof(proof_file)
+                    target=next((r for r in rows if r['id']==chat.get('proof_target')),None)
+                    target=target or (rows[0] if len(rows)==1 else None)
+                    if target:
+                        payment_proofs.attach(target,file)
+                        chat['state']='caliente'
+                        chat.pop('proof_target',None)
+                        message='Comprobante recibido para '+target['course_title']+'. Está pendiente de revisión. La inscripción aún no está validada.'
+                        markup=bot_flow.home_keyboard()
+                    else:
+                        chat['unassigned_proof']=file
+                        message='Recibí el archivo. ¿A cuál de tus inscripciones corresponde?'
+                        markup=bot_flow.keyboard(*[[bot_flow.button(r['course_title'][:55],'upload:'+r['id'])] for r in rows])
+                    chat['pending']=False
+                    save(chat)
+                    deliver(chat,message,markup)
+                    append(chat,'assistant',message)
+                except ValueError as error:
+                    deliver(chat,str(error),bot_flow.home_keyboard())
+                    append(chat,'assistant',str(error))
+                save(chat)
+                return chat
             if telegram_id:
                 chat['pending'] = False
-                document_action = action == 'documents' or (action or '').startswith('document:') or text.strip().lower() == '/documentos'
+                document_action = action in ['documents','proofs'] or (action or '').startswith(('document:','upload:')) or text.strip().lower() == '/documentos'
                 previous_mode = chat['mode']
                 if action in ['bot_chat', 'enrollments'] or (action or '').startswith('register:') or text.strip().lower() in ['/bot', '/inscribirme']:
                     chat['mode'] = 'ai'
@@ -205,6 +239,15 @@ def create_app(store=None):
                     threading.Thread(target=infer, args=(chat_id, chat['revision'], flow.get('prompt'), flow['markup'] or bot_flow.home_keyboard()), daemon=True).start()
                 else:
                     try:
+                        if flow.get('attach_proof'):
+                            target=next(r for r in chat['registrations'] if r['id']==flow['attach_proof'])
+                            payment_proofs.attach(target,chat.pop('unassigned_proof'))
+                            save(chat)
+                        if flow.get('send_order'):
+                            row=next(r for r in chat['registrations'] if r['id']==flow['send_order'])
+                            receipts.ensure_order(row)
+                            save(chat)
+                            telegram.send_document(chat['telegram_id'],base64.b64decode(row['order_pdf']),row['order_number']+'.pdf',caption='Orden de pago. Datos bancarios ficticios: no realizar pagos reales. Envía una imagen o PDF del comprobante para revisión.')
                         if flow.get('document'):
                             requested = flow['document']
                             row = next(r for r in chat['registrations'] if r['id']==requested['id'])
@@ -316,9 +359,9 @@ def create_app(store=None):
     def analytics():
         rows = db.all()
         registrations = [r for c in rows for r in c.get('registrations', [])]
-        real = [r for r in registrations if not r.get('is_demo')]
+        real = [r for r in registrations if not r.get('is_demo') and not r.get('payment_demo')]
         from decimal import Decimal
-        return jsonify(conversations=len(rows), registrations=len(registrations), pending=sum(r['status']=='pending_payment' for r in registrations), paid=sum(r['status']=='paid' for r in registrations), demo=sum(bool(r.get('is_demo')) for r in registrations), conversion=round(100 * sum(bool(c.get('registrations')) for c in rows) / len(rows), 1) if rows else 0, confirmed_usd=str(sum((Decimal(r['price']['amount']) for r in real if r['status']=='paid' and r.get('price', {}).get('currency')=='USD' and r['price'].get('amount') is not None), Decimal(0))), waiting=sum(bool(c.get('waiting_for_advisor')) for c in rows))
+        return jsonify(conversations=len(rows), registrations=len(registrations), pending=sum(r['status'] in ['pending_payment','pending_review'] for r in registrations), review=sum(r['status']=='pending_review' for r in registrations), paid=sum(r['status']=='paid' for r in registrations), demo=sum(bool(r.get('is_demo') or r.get('payment_demo')) for r in registrations), conversion=round(100 * sum(bool(c.get('registrations')) for c in rows) / len(rows), 1) if rows else 0, confirmed_usd=str(sum((Decimal(r['price']['amount']) for r in real if r['status']=='paid' and r.get('price', {}).get('currency')=='USD' and r['price'].get('amount') is not None), Decimal(0))), waiting=sum(bool(c.get('waiting_for_advisor')) for c in rows))
 
     @app.post('/api/logout')
     def logout():
@@ -356,6 +399,10 @@ def create_app(store=None):
             for registration in chat.get('registrations', []):
                 registration['receipt_available'] = bool(registration.pop('receipt_pdf', None))
                 registration['order_available'] = bool(registration.pop('order_pdf', None))
+                for proof in registration.get('proofs',[]):
+                    proof.pop('content',None)
+            if chat.get('unassigned_proof'):
+                chat['unassigned_proof'].pop('content',None)
         return jsonify(sorted(rows, key=lambda chat: chat['updated_at'], reverse=True))
 
     @app.get('/api/courses')
@@ -437,6 +484,7 @@ def create_app(store=None):
             if chat.get('telegram_id'):
                 try:
                     deliver(chat, enrollment.notice(row))
+                    telegram.send_document(chat['telegram_id'],base64.b64decode(row['order_pdf']),row['order_number']+'.pdf',caption='Orden de pago con datos ficticios. Adjunta imagen o PDF del comprobante para revisión.')
                     row['registration_notice'] = 'sent'
                     notified = True
                 except Exception:
@@ -444,7 +492,7 @@ def create_app(store=None):
                     chat['error'] = 'Inscripción guardada; no se pudo entregar el aviso por Telegram.'
                     notified = False
                 save(chat)
-            return jsonify(registration={k:v for k,v in row.items() if k not in ['receipt_pdf','order_pdf']}, chat_id=chat_id, notified=notified), 201
+            return jsonify(registration=registration_view(row), chat_id=chat_id, notified=notified), 201
 
     @app.get('/api/bot')
     def bot_info():
@@ -457,13 +505,22 @@ def create_app(store=None):
             row = next((r for r in (chat or {}).get('registrations', []) if r['id'] == registration_id), None)
             if not row:
                 return jsonify(error='Inscripción inexistente'), 404
+            proof=next((p for p in reversed(row.get('proofs',[])) if p['status']=='received'),None)
+            if row['status']!='paid' and (row['status']!='pending_review' or not proof):
+                return jsonify(error='Primero el estudiante debe adjuntar una imagen o PDF de comprobante para revisión'),409
+            expected=(request.get_json(silent=True) or {}).get('proof_id')
+            if row['status']!='paid' and expected and proof['id']!=expected:
+                return jsonify(error='El usuario envió otro archivo. Actualiza y revisa el nuevo comprobante antes de validar.'),409
             if not row.get('receipt_pdf'):
                 candidate = dict(row)
                 candidate.update(status='paid', paid_at=row.get('paid_at') or now(), confirmed_by=row.get('confirmed_by') or session.get('operator_name', 'Administrador'), receipt_number='CTT-'+datetime.now(timezone.utc).strftime('%Y%m%d')+'-'+secrets.token_hex(4).upper())
                 pdf = receipts.build(candidate)
                 row.update(candidate, payment_reference=candidate['receipt_number'], receipt_pdf=base64.b64encode(pdf).decode(), receipt_delivery='pending' if chat.get('telegram_id') else 'not_linked')
-                row.setdefault('audit', []).append({'action':'payment_receipt_issued','at':now(),'actor':session.get('operator_name','Administrador'),'receipt':row['receipt_number'],'price':dict(row.get('price') or {})})
-                append(chat, 'operator', 'Pago confirmado. Comprobante generado: '+row['receipt_number'])
+                row['enrollment_status']='validated'
+                if proof:
+                    proof.update(status='approved',reviewed_at=now(),reviewed_by=session.get('operator_name','Administrador'))
+                row.setdefault('audit', []).append({'action':'payment_receipt_issued','at':now(),'actor':session.get('operator_name','Administrador'),'receipt':row['receipt_number'],'proof_id':proof['id'] if proof else None,'price':dict(row.get('price') or {})})
+                append(chat, 'operator', 'Comprobante revisado e inscripción validada. Documento generado: '+row['receipt_number'])
                 if chat['mode'] == 'human':
                     chat['operator_last_activity'] = time.time()
                 save(chat)
@@ -479,7 +536,7 @@ def create_app(store=None):
                     notified = False
                     chat['error'] = 'Comprobante guardado y pago confirmado. Falló el envío del PDF; puedes reintentarlo.'
                 save(chat)
-            return jsonify(registration={k:v for k,v in row.items() if k not in ['receipt_pdf','order_pdf']}, notified=notified)
+            return jsonify(registration=registration_view(row), notified=notified)
 
     @app.get('/api/chats/<chat_id>/registrations/<registration_id>/receipt')
     def download_receipt(chat_id, registration_id):
@@ -501,6 +558,72 @@ def create_app(store=None):
             save(chat)
             disposition = 'inline' if request.args.get('inline')=='1' else 'attachment'
             return Response(base64.b64decode(row['order_pdf']),mimetype='application/pdf',headers={'Content-Disposition':disposition+'; filename="'+row['order_number']+'.pdf"'})
+
+    @app.get('/api/chats/<chat_id>/registrations/<registration_id>/proofs/<proof_id>')
+    def view_proof(chat_id,registration_id,proof_id):
+        chat=db.get(chat_id)
+        row=next((r for r in (chat or {}).get('registrations',[]) if r['id']==registration_id),None)
+        proof=next((p for p in (row or {}).get('proofs',[]) if p['id']==proof_id),None)
+        if not proof or not proof.get('content'):
+            return jsonify(error='Comprobante no encontrado'),404
+        if chat.get('mode')=='human':
+            with chat_lock(chat_id):
+                current=db.get(chat_id)
+                current['operator_last_activity']=time.time()
+                save(current)
+        return Response(base64.b64decode(proof['content']),mimetype=proof['mime'],headers={'Content-Disposition':'inline','X-Content-Type-Options':'nosniff'})
+
+    @app.post('/api/chats/<chat_id>/registrations/<registration_id>/proofs')
+    def upload_proof(chat_id,registration_id):
+        file=request.files.get('file')
+        if not file:
+            return jsonify(error='Adjunta una imagen o PDF'),400
+        try:
+            data=payment_proofs.pack(file.read(5*1024*1024+1))
+        except ValueError as error:
+            return jsonify(error=str(error)),400
+        with chat_lock(chat_id):
+            chat=db.get(chat_id)
+            row=next((r for r in (chat or {}).get('registrations',[]) if r['id']==registration_id),None)
+            if not row or row['status'] not in ['pending_payment','pending_review']:
+                return jsonify(error='Esta inscripción no admite otro comprobante'),409
+            proof=payment_proofs.attach(row,{**data,'uploaded_by':session.get('operator_name','Administrador'),'source':'dashboard'})
+            if chat.get('mode')=='human':
+                chat['operator_last_activity']=time.time()
+            append(chat,'operator','Comprobante adjunto para revisión: '+row['course_title'])
+            save(chat)
+            return jsonify(proof={k:v for k,v in proof.items() if k!='content'}),201
+
+    @app.post('/api/chats/<chat_id>/registrations/<registration_id>/reject')
+    def reject_proof(chat_id,registration_id):
+        reason=str((request.get_json(silent=True) or {}).get('reason','')).strip()
+        if not 3<=len(reason)<=1000:
+            return jsonify(error='Indica el motivo del rechazo (3 a 1000 caracteres)'),400
+        with chat_lock(chat_id):
+            chat=db.get(chat_id)
+            row=next((r for r in (chat or {}).get('registrations',[]) if r['id']==registration_id),None)
+            proof=next((p for p in reversed((row or {}).get('proofs',[])) if p['status']=='received'),None)
+            if not row or row['status']!='pending_review' or not proof:
+                return jsonify(error='No hay un comprobante pendiente de revisión'),409
+            expected=(request.get_json(silent=True) or {}).get('proof_id')
+            if expected and proof['id']!=expected:
+                return jsonify(error='El comprobante cambió. Actualiza y revisa el nuevo archivo.'),409
+            proof.update(status='rejected',reviewed_at=now(),reviewed_by=session.get('operator_name','Administrador'),reason=reason)
+            row.update(status='pending_payment',enrollment_status='pending_validation')
+            if chat.get('mode')=='human':
+                chat['operator_last_activity']=time.time()
+            row.setdefault('audit',[]).append({'action':'proof_rejected','at':now(),'actor':session.get('operator_name','Administrador'),'proof_id':proof['id'],'reason':reason})
+            message='El encargado no pudo validar el comprobante de '+row['course_title']+'. Motivo: '+reason+'. Envía una nueva imagen o PDF. Tu inscripción sigue pendiente de validación.'
+            append(chat,'operator',message)
+            save(chat)
+            notified=None
+            if chat.get('telegram_id'):
+                try:
+                    deliver(chat,message,bot_flow.keyboard([bot_flow.button('📤 Enviar otro comprobante','upload:'+row['id'])]))
+                    notified=True
+                except Exception:
+                    notified=False;chat['error']='Rechazo guardado; no se pudo entregar el aviso por Telegram.';save(chat)
+            return jsonify(ok=True,notified=notified)
 
     @app.post('/api/demo')
     def demo():

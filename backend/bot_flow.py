@@ -21,6 +21,7 @@ def home_keyboard():
                     [button('🤖 Conversar con el bot', 'bot_chat')],
                     [button('🧾 Mis inscripciones', 'registrations')],
                     [button('📄 Mis documentos PDF', 'documents')],
+                    [button('📤 Enviar comprobante', 'proofs')],
                     [button('❓ Preguntas frecuentes', 'faq'), button('👤 Hablar con asesor', 'human')])
 
 
@@ -59,6 +60,24 @@ def route(chat, text, courses, action=None):
     state, handover = triage(text)
     result = {'text': '', 'markup': home_keyboard(), 'infer': False, 'handover': False, 'state': state}
     clean = normalized(text.strip())
+    if action == 'proofs':
+        from backend.payment_proofs import eligible
+        rows=eligible(chat)
+        result['text']='Selecciona la inscripción y adjunta una imagen JPG/PNG o PDF del comprobante (hasta 5 MB). El encargado debe revisarlo; enviarlo no valida la inscripción.' if rows else 'No tienes inscripciones pendientes de comprobante.'
+        result['markup']=keyboard(*[[button(r['course_title'][:55],'upload:'+r['id'])] for r in rows],[button('🏠 Menú','home')])
+        return result
+    if action and action.startswith('upload:'):
+        from backend.payment_proofs import eligible
+        rid=action.partition(':')[2]
+        row=next((r for r in eligible(chat) if r['id']==rid),None)
+        if not row:
+            result['text']='Esta inscripción no admite otro comprobante.'
+        elif chat.get('unassigned_proof'):
+            result.update(attach_proof=rid,text='Comprobante recibido para '+row['course_title']+'. Queda pendiente de revisión por el encargado.',preserve=True)
+        else:
+            chat['proof_target']=rid
+            result.update(text='Adjunta ahora la imagen o PDF del comprobante de '+row['course_title']+'. No realizar pagos reales con los datos ficticios de esta demostración.',preserve=True)
+        return result
     if action == 'documents' or clean == '/documentos':
         rows = chat.get('registrations') or []
         result['text'] = 'Selecciona el PDF de tu curso. La orden no acredita pago; el comprobante solo aparece cuando el equipo confirma el pago.' if rows else 'Todavía no tienes inscripciones con documentos disponibles.'
@@ -67,6 +86,8 @@ def route(chat, text, courses, action=None):
             buttons.append([button('📋 Orden · '+row['course_title'][:35], 'document:order:'+row['id'])])
             if row['status'] == 'paid':
                 buttons.append([button('✅ Comprobante · '+row['course_title'][:30], 'document:receipt:'+row['id'])])
+            else:
+                buttons.append([button('📤 Adjuntar · '+row['course_title'][:35], 'upload:'+row['id'])])
         result['markup'] = keyboard(*buttons, [button('🏠 Menú', 'home')])
         return result
     if action and action.startswith('document:'):
@@ -120,10 +141,12 @@ def route(chat, text, courses, action=None):
             result['text'] = f"Solicitud de DEMOSTRACIÓN {row['id']} registrada para {row['course_title']}. Estado: PENDIENTE DE PAGO (simulado). No debes realizar ningún pago real por esta prueba."
         if row:
             result['text'] = enrollment.notice(row)
+            result['send_order'] = row['id']
+            result['markup'] = keyboard([button('📤 Enviar comprobante','upload:'+row['id'])],[button('📄 Mis documentos PDF','documents')],[button('🏠 Menú','home')])
         return result
     if action == 'registrations':
         rows = chat.get('registrations', [])
-        result['text'] = '\n\n'.join(f"{r['course_title']}\nCódigo: {r['id']}\nEstado: {'Pago confirmado' if r['status'] == 'paid' else 'Pendiente de pago'}" for r in rows) or 'Todavía no tienes solicitudes registradas.'
+        result['text'] = '\n\n'.join(f"{r['course_title']}\nCódigo: {r['id']}\nEstado: {'Inscripción validada' if r['status'] == 'paid' else 'Comprobante pendiente de revisión' if r['status']=='pending_review' else 'Pendiente de comprobante de pago'}" for r in rows) or 'Todavía no tienes solicitudes registradas.'
         return result
     if action == 'bot_chat' or clean == '/bot':
         chat.pop('registration_draft', None)

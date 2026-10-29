@@ -2,6 +2,7 @@ import re
 import secrets
 from decimal import Decimal, InvalidOperation
 from backend import receipts
+from backend.payment_proofs import BANK
 from datetime import datetime, timezone
 
 
@@ -28,7 +29,8 @@ def choose_price(chat, course, index):
 def notice(row):
     price = row.get('price') or {}
     amount = f"{price.get('amount')} {price.get('currency', 'USD')} · {price.get('category')}" if price.get('amount') is not None else 'Importe pendiente de confirmar por el centro'
-    return f"Solicitud {row['id']} registrada para {row['course_title']}.\nEstado: PENDIENTE DE PAGO.\nTarifa: {amount}\n" + ('DEMOSTRACIÓN: no realices pagos reales.' if row.get('is_demo') else 'Acércate al CTT-FISEI, Campus Huachi, para verificar cupo y realizar el pago. Conserva el comprobante; el equipo confirmará el pago en el sistema.')
+    bank=row.get('bank') or BANK
+    return f"Solicitud {row['id']} registrada para {row['course_title']}.\nEstado: PENDIENTE DE PAGO Y VALIDACIÓN.\nTarifa: {amount}\n\n{bank['bank']}\nCuenta: {bank['account']}\nBeneficiario: {bank['beneficiary']}\n{bank['notice']}\n\nRecibirás una orden PDF. Adjunta una imagen o PDF de comprobante desde «Enviar comprobante»; el encargado lo revisará antes de validar tu inscripción."
 
 
 def collect(chat, text):
@@ -80,6 +82,7 @@ def confirm(chat, course):
     row = {k: draft[k] for k in ['course_id', 'course_title', 'name', 'identification', 'phone', 'email']}
     row.update(id=secrets.token_hex(8), status='pending_payment', created_at=datetime.now(timezone.utc).isoformat(), paid_at=None, is_demo=bool(course.get('is_demo')))
     row['price'] = dict(draft.get('price') or {})
+    row.update(bank=dict(BANK),payment_demo=True,enrollment_status='pending_validation')
     receipts.ensure_order(row)
     rows.append(row)
     chat.pop('registration_draft', None)
