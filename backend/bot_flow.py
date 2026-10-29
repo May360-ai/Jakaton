@@ -36,7 +36,7 @@ def course_keyboard(course):
 
 def available(courses):
     valid = [c for c in courses if c.get('titulo') and c['titulo'].strip().upper() != 'S/N' and c.get('estado') != 'ARCHIVADO']
-    real = [c for c in valid if not c.get('is_demo') and c.get('estado') != 'DEMO']
+    real = [c for c in valid if (not c.get('is_demo') and c.get('estado') != 'DEMO') or (c.get('is_demo') and c.get('estado') == 'ABIERTO')]
     return real or valid
 
 
@@ -69,6 +69,8 @@ def route(chat, text, courses, action=None):
         row = enrollment.confirm(chat, course) if course else None
         result['text'] = (f"Solicitud {row['id']} registrada para {row['course_title']}.\nEstado: PENDIENTE DE PAGO.\nAcércate al CTT-FISEI, Campus Huachi, para verificar disponibilidad y realizar el pago de tu inscripción. El equipo confirmará el pago en el sistema. No realices pagos por este chat.\nTu cupo y la apertura de la edición deben ser confirmados por el centro." if row else 'Esta solicitud ya fue procesada o venció. Consulta Mis inscripciones.')
         result['state'] = 'caliente'
+        if row and course.get('is_demo'):
+            result['text'] = f"Solicitud de DEMOSTRACIÓN {row['id']} registrada para {row['course_title']}. Estado: PENDIENTE DE PAGO (simulado). No debes realizar ningún pago real por esta prueba."
         return result
     if action == 'registrations':
         rows = chat.get('registrations', [])

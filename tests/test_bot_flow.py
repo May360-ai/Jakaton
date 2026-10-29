@@ -24,7 +24,7 @@ class BotFlowTests(unittest.TestCase):
         course['estado'] = 'ABIERTO'
         result = bot_flow.route({}, '', [course], 'enroll:4')
         self.assertFalse(any('url' in b for row in result['markup']['inline_keyboard'] for b in row))
-        self.assertEqual(len(bot_flow.available([*COURSES, {**COURSES[0], 'id': 8, 'is_demo': True}])), 1)
+        self.assertEqual(len(bot_flow.available([*COURSES, {**COURSES[0], 'id': 8, 'is_demo': True, 'estado': 'DEMO'}])), 1)
 
     def test_navigation_never_requests_llm(self):
         chat = {}

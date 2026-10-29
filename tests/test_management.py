@@ -57,3 +57,14 @@ class ManagementTests(unittest.TestCase):
         result = route(chat, '', courses, 'register:7')
         self.assertIn('nombre completo', result['text'])
         self.assertEqual(chat['registration_draft']['step'], 'name')
+
+    def test_inline_registration_attaches_to_selected_conversation(self):
+        self.client.post('/api/login', json={'password': 'test'})
+        course = self.client.post('/api/courses', json={'titulo': 'Curso abierto', 'estado': 'ABIERTO', 'details': {}}).json
+        self.store.save({'id':'tg-selected','name':'Ana','messages':[],'mode':'human','revision':1,'registrations':[],'updated_at':'2026-10-29T00:00:00+00:00'})
+        result = self.client.post('/api/registrations', json={'chat_id':'tg-selected','course_id':course['id'],'name':'Ana Pérez','identification':'1710034065','phone':'0991234567','email':'ana@example.com'})
+        self.assertEqual(result.status_code, 201)
+        self.assertEqual(result.json['chat_id'], 'tg-selected')
+        chat = self.store.get('tg-selected')
+        self.assertEqual(len(chat['registrations']), 1)
+        self.assertIn('pendiente de pago',chat['messages'][-1]['text'])

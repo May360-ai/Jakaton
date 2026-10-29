@@ -53,7 +53,7 @@ def confirm(chat, course):
         chat.pop('registration_draft', None)
         return existing
     row = {k: draft[k] for k in ['course_id', 'course_title', 'name', 'identification', 'phone', 'email']}
-    row.update(id=secrets.token_hex(8), status='pending_payment', created_at=datetime.now(timezone.utc).isoformat(), paid_at=None)
+    row.update(id=secrets.token_hex(8), status='pending_payment', created_at=datetime.now(timezone.utc).isoformat(), paid_at=None, is_demo=bool(course.get('is_demo')))
     rows.append(row)
     chat.pop('registration_draft', None)
     return row

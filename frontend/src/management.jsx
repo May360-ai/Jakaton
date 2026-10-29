@@ -3,11 +3,12 @@ import React, {useState} from 'react';
 const states=['ABIERTO','PRÓXIMAMENTE','INSCRIPCIONES FINALIZADAS','POR CONFIRMAR','ARCHIVADO','DEMO'];
 const lines=text=>String(text||'').split('\n').map(x=>x.trim()).filter(Boolean);
 
-export function RegistrationCreator({courses,api,onSaved}){
-  const [open,setOpen]=useState(false),[form,setForm]=useState({}),[error,setError]=useState(''),[busy,setBusy]=useState(false);
+export function RegistrationCreator({courses,api,onSaved,chat=null,initialOpen=false}){
+  const initial = ()=>({name:chat?.registrations?.at(-1)?.name||chat?.name||'',course_id:courses.some(c=>c.id===chat?.selected_course&&['ABIERTO','PRÓXIMAMENTE'].includes(c.estado))?chat.selected_course:'',...Object.fromEntries(['identification','phone','email'].map(k=>[k,chat?.registrations?.at(-1)?.[k]||chat?.registration_draft?.[k]||'']))});
+  const [open,setOpen]=useState(initialOpen),[form,setForm]=useState(initial),[error,setError]=useState(''),[busy,setBusy]=useState(false);
   const eligible=courses.filter(c=>['ABIERTO','PRÓXIMAMENTE'].includes(c.estado));
   const change=(key,value)=>setForm({...form,[key]:value});
-  return <div className="management-create"><button className="primary" onClick={()=>setOpen(!open)}>{open?'Cerrar formulario':'+ Inscribir persona'}</button>{open&&<form className="management-form" onSubmit={async e=>{e.preventDefault();setBusy(true);setError('');try{await api('/registrations',form);await onSaved();setForm({});setOpen(false);}catch(e){setError(e.message);}finally{setBusy(false);}}}>
+  return <div className="management-create"><button className="primary" onClick={()=>setOpen(!open)}>{open?'Cerrar formulario':'+ Inscribir persona'}</button>{open&&<form className="management-form" onSubmit={async e=>{e.preventDefault();setBusy(true);setError('');try{await api('/registrations',{...form,...(chat?{chat_id:chat.id}:{})});await onSaved();setForm(initial());setOpen(false);}catch(e){setError(e.message);}finally{setBusy(false);}}}>
     <h3>Nueva inscripción · pendiente de pago</h3><label>Curso<select required value={form.course_id||''} onChange={e=>change('course_id',e.target.value)}><option value="">Selecciona un curso abierto o próximo</option>{eligible.map(c=><option key={c.id} value={c.id}>{c.titulo}</option>)}</select></label>
     {!eligible.length&&<p>No hay cursos habilitados. Revisa su estado en Catálogo de cursos.</p>}
     {[['name','Nombres y apellidos','text'],['identification','Cédula (10 dígitos)','text'],['phone','Teléfono','tel'],['email','Correo','email']].map(([key,label,type])=><label key={key}>{label}<input type={type} required maxLength={key==='name'?120:key==='email'?254:20} value={form[key]||''} onChange={e=>change(key,e.target.value)}/></label>)}

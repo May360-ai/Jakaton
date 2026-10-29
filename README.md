@@ -89,3 +89,9 @@ En Catálogo de cursos hay búsqueda por nombre, descripción o modalidad, filtr
 En Inscripciones está el formulario Inscribir persona, con validación compartida con Telegram y prevención de duplicados por cédula y curso. Se puede buscar por nombre, cédula, teléfono, correo o curso y filtrar pendientes y pagados. Las ediciones abiertas o próximas aceptan solicitudes; las finalizadas requieren una nueva edición o una corrección explícita del administrador.
 
 Telegram ofrece Inscribirme en un curso en el menú, /inscribirme y un botón directo en cada ficha. Requisitos y detalles ahora reproduce la sección completa de la página fuente, incluidos beneficiarios, cupo, fechas y certificación, además de los materiales. Los textos largos se paginan sin recurrir a la IA.
+
+## Inscripción en la bandeja y resumen del operador
+
+Cada conversación ofrece Inscribir persona sin salir de la bandeja. Reutiliza los datos disponibles y adjunta la inscripción al chat seleccionado, con su estado visible en el hilo. El resumen usa nombres de curso, experiencia, objetivo, última consulta y siguiente paso sugerido; omite mensajes de captura de datos y eventos técnicos del menú. Se calcula también para conversaciones anteriores.
+
+Los tres cursos iniciales de demostración están habilitados como ABIERTO y marcados con DEMO. Permiten probar el registro sin modificar los estados de los cursos oficiales. Una inscripción de demostración advierte que no corresponde realizar pagos reales.

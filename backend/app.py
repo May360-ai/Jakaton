@@ -12,7 +12,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from flask import Flask, Response, jsonify, request, send_from_directory, session
 
-from backend import agents, telegram, bot_flow, enrollment
+from backend import agents, telegram, bot_flow, enrollment, operator_summary
 from backend.store import Store
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -114,6 +114,8 @@ def create_app(store=None):
                 text = bot_flow.label(action, current_catalog()) if action is not None else text
             collecting = bool(chat.get('registration_draft'))
             append(chat, 'user', text[:4000])
+            if action is not None:
+                chat['messages'][-1]['action'] = action
             if collecting:
                 chat['messages'][-1]['private'] = True
             state, handover = agents.triage(text)
@@ -213,7 +215,10 @@ def create_app(store=None):
 
     @app.get('/api/chats')
     def chats():
-        return jsonify(sorted(db.all(), key=lambda chat: chat['updated_at'], reverse=True))
+        rows = db.all()
+        for chat in rows:
+            chat['summary'] = operator_summary.summarize(chat, current_catalog())
+        return jsonify(sorted(rows, key=lambda chat: chat['updated_at'], reverse=True))
 
     @app.get('/api/courses')
     def courses():
@@ -262,9 +267,12 @@ def create_app(store=None):
         if not course or course.get('estado') not in ['ABIERTO', 'PRÓXIMAMENTE']:
             return jsonify(error='Elige una edición abierta o próxima. Puedes gestionar su estado desde Cursos.'), 400
         import hashlib
-        chat_id = 'manual-' + hashlib.sha256(str(data.get('identification', '')).strip().encode()).hexdigest()[:20]
-        with chat_lock('manual-registrations'):
-            chat = db.get(chat_id) or {'id': chat_id, 'name': str(data.get('name', '')), 'telegram_id': None, 'mode': 'human', 'state': 'caliente', 'messages': [], 'registrations': [], 'revision': 0, 'updates': [], 'pending': False, 'error': None, 'summary': 'Inscripción creada desde el dashboard'}
+        chat_id = str(data.get('chat_id') or 'manual-' + hashlib.sha256(str(data.get('identification', '')).strip().encode()).hexdigest()[:20])
+        with chat_lock('manual-registrations'), chat_lock(chat_id):
+            chat = db.get(chat_id)
+            if data.get('chat_id') and not chat:
+                return jsonify(error='Conversación inexistente'), 404
+            chat = chat or {'id': chat_id, 'name': str(data.get('name', '')), 'telegram_id': None, 'mode': 'human', 'state': 'caliente', 'messages': [], 'registrations': [], 'revision': 0, 'updates': [], 'pending': False, 'error': None, 'summary': 'Inscripción creada desde el dashboard'}
             enrollment.begin(chat, course)
             for key in ['name', 'identification', 'phone', 'email']:
                 before = chat['registration_draft']['step']
@@ -276,6 +284,8 @@ def create_app(store=None):
                     return jsonify(error='Esta cédula ya tiene una inscripción para el curso'), 409
             row = enrollment.confirm(chat, course)
             row['source'] = 'dashboard'
+            append(chat, 'operator', f"Solicitud {row['id']} registrada para {course['titulo']}. Estado: pendiente de pago.")
+            chat['state'] = 'caliente'
             save(chat)
             return jsonify(registration=row, chat_id=chat_id), 201
 
