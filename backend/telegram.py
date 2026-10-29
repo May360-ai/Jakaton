@@ -34,9 +34,9 @@ def delete_message(chat_id, message_id):
     return call('deleteMessage', {'chat_id': chat_id, 'message_id': message_id}, timeout=8)
 
 
-def send_document(chat_id, data, filename):
+def send_document(chat_id, data, filename, caption='Tu comprobante de registro de pago. Conserva este PDF.'):
     try:
-        response = requests.post(f"https://api.telegram.org/bot{os.getenv('TELEGRAM_BOT_TOKEN')}/sendDocument", data={'chat_id': str(chat_id), 'caption': 'Tu comprobante de registro de pago. Conserva este PDF.'}, files={'document': (filename, data, 'application/pdf')}, timeout=(10,45))
+        response = requests.post(f"https://api.telegram.org/bot{os.getenv('TELEGRAM_BOT_TOKEN')}/sendDocument", data={'chat_id': str(chat_id), 'caption': caption}, files={'document': (filename, data, 'application/pdf')}, timeout=(10,45))
         result = response.json()
         if not response.ok or not result.get('ok'):
             raise RuntimeError('Telegram no aceptó el documento')
@@ -50,6 +50,7 @@ def configure():
         {'command': 'start', 'description': 'Abrir el menú principal'},
         {'command': 'cursos', 'description': 'Explorar cursos y contenido'},
         {'command': 'inscribirme', 'description': 'Inscribirme directamente desde el bot'},
+        {'command': 'documentos', 'description': 'Ver PDFs de mis cursos inscritos'},
         {'command': 'asesor', 'description': 'Solicitar atención humana'},
         {'command': 'ayuda', 'description': 'Preguntas frecuentes'},
         {'command': 'bot', 'description': 'Conversar con el asistente automático'},

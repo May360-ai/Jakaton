@@ -123,3 +123,9 @@ El curso seleccionado, perfil e historial se mantienen en la conversación. Las 
 ## Navegación limpia en Telegram
 
 Al avanzar por el menú se envía primero la nueva pantalla y después se intenta retirar la anterior mediante deleteMessage. Solo se eliminan IDs guardados expresamente como navegación temporal; no se borran mensajes del estudiante, del operador, comprobantes PDF ni confirmaciones de inscripción o pago. Los resúmenes de revisión de datos y tarifas también se conservan. El dashboard conserva íntegro el historial y la memoria del bot. Si falla el nuevo envío, no se elimina el menú anterior. Si Telegram rechaza una eliminación, el flujo continúa y se reintenta en la siguiente navegación. La cola de IDs se persiste para conservar este comportamiento al reiniciar; los mensajes anteriores a esta función no se borran retrospectivamente.
+
+## Consulta de documentos por curso
+
+Cada inscripción genera una orden de pago PDF con estado pendiente y advertencia de que no acredita un pago. En Inscripciones y pagos, Ver orden de pago y Ver comprobante PDF abren el documento dentro de la plataforma con opción de descarga. El comprobante se crea al confirmar el pago y se envía automáticamente al Telegram vinculado; un fallo conserva el PDF para reintento. Las órdenes históricas pueden generarse al consultarlas sin modificar el estado de pago.
+
+En Telegram, Mis documentos PDF y /documentos enumeran las órdenes de las inscripciones de ese chat y los comprobantes de pagos confirmados. Cada botón entrega el PDF solicitado; no se publica una URL privada de la base. El servidor comprueba la pertenencia de la inscripción antes de generar o enviar documentos y no entrega comprobantes para pagos pendientes. La consulta funciona durante atención humana sin reactivar la IA. Los PDFs nunca forman parte de los mensajes temporales que se limpian al navegar.

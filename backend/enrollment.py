@@ -1,6 +1,7 @@
 import re
 import secrets
 from decimal import Decimal, InvalidOperation
+from backend import receipts
 from datetime import datetime, timezone
 
 
@@ -79,6 +80,7 @@ def confirm(chat, course):
     row = {k: draft[k] for k in ['course_id', 'course_title', 'name', 'identification', 'phone', 'email']}
     row.update(id=secrets.token_hex(8), status='pending_payment', created_at=datetime.now(timezone.utc).isoformat(), paid_at=None, is_demo=bool(course.get('is_demo')))
     row['price'] = dict(draft.get('price') or {})
+    receipts.ensure_order(row)
     rows.append(row)
     chat.pop('registration_draft', None)
     return row

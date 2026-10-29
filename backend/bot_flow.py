@@ -20,6 +20,7 @@ def home_keyboard():
                     [button('🧭 Ayúdame a elegir', 'guide')],
                     [button('🤖 Conversar con el bot', 'bot_chat')],
                     [button('🧾 Mis inscripciones', 'registrations')],
+                    [button('📄 Mis documentos PDF', 'documents')],
                     [button('❓ Preguntas frecuentes', 'faq'), button('👤 Hablar con asesor', 'human')])
 
 
@@ -58,6 +59,26 @@ def route(chat, text, courses, action=None):
     state, handover = triage(text)
     result = {'text': '', 'markup': home_keyboard(), 'infer': False, 'handover': False, 'state': state}
     clean = normalized(text.strip())
+    if action == 'documents' or clean == '/documentos':
+        rows = chat.get('registrations') or []
+        result['text'] = 'Selecciona el PDF de tu curso. La orden no acredita pago; el comprobante solo aparece cuando el equipo confirma el pago.' if rows else 'Todavía no tienes inscripciones con documentos disponibles.'
+        buttons = []
+        for row in rows:
+            buttons.append([button('📋 Orden · '+row['course_title'][:35], 'document:order:'+row['id'])])
+            if row['status'] == 'paid':
+                buttons.append([button('✅ Comprobante · '+row['course_title'][:30], 'document:receipt:'+row['id'])])
+        result['markup'] = keyboard(*buttons, [button('🏠 Menú', 'home')])
+        return result
+    if action and action.startswith('document:'):
+        pieces = action.split(':')
+        row = next((r for r in chat.get('registrations', []) if len(pieces)==3 and r['id']==pieces[2]), None)
+        if not row or pieces[1] not in ['order','receipt'] or (pieces[1]=='receipt' and row['status']!='paid'):
+            result['text'] = 'Ese documento no está disponible en tus inscripciones.'
+        else:
+            result['text'] = 'Aquí está el PDF de '+row['course_title']+'.'
+            result['document'] = {'id':row['id'],'kind':pieces[1]}
+            result['preserve'] = True
+        return result
     if action and action.startswith('tariff:'):
         draft = chat.get('registration_draft') or {}
         course = next((c for c in courses if c['id'] == draft.get('course_id')), None)

@@ -175,9 +175,11 @@ def create_app(store=None):
             chat['revision'] += 1
             if telegram_id:
                 chat['pending'] = False
+                document_action = action == 'documents' or (action or '').startswith('document:') or text.strip().lower() == '/documentos'
+                previous_mode = chat['mode']
                 if action in ['bot_chat', 'enrollments'] or (action or '').startswith('register:') or text.strip().lower() in ['/bot', '/inscribirme']:
                     chat['mode'] = 'ai'
-                if chat['mode'] == 'human':
+                if chat['mode'] == 'human' and not document_action:
                     if not advisor_available() and not chat.get('absence_notified'):
                         chat.update(waiting_for_advisor=True, absence_notified=True)
                         notice = 'Ahora no hay un asesor disponible. Tu consulta quedó registrada. Puedes volver al asistente con /bot o inscribirte con /inscribirme, sin esperar al operador.'
@@ -196,21 +198,28 @@ def create_app(store=None):
                     chat['waiting_for_advisor'] = False
                 chat['state'] = flow['state']
                 chat['summary'] = f"Curso: {chat.get('selected_course', 'sin seleccionar')}. Perfil: {chat.get('profile', {})}. Última acción: {'Datos de inscripción recibidos' if collecting else text[:200]}"
-                chat['mode'] = 'human' if flow['handover'] else 'ai'
+                chat['mode'] = previous_mode if document_action else 'human' if flow['handover'] else 'ai'
                 chat['pending'] = flow['infer']
                 save(chat)
                 if flow['infer']:
                     threading.Thread(target=infer, args=(chat_id, chat['revision'], flow.get('prompt'), flow['markup'] or bot_flow.home_keyboard()), daemon=True).start()
                 else:
                     try:
-                        keep = action in ['confirm_registration', 'registrations', 'human'] or (action or '').startswith('enroll:') or flow['handover'] or (chat.get('registration_draft') or {}).get('step') == 'confirm'
+                        if flow.get('document'):
+                            requested = flow['document']
+                            row = next(r for r in chat['registrations'] if r['id']==requested['id'])
+                            kind = requested['kind']
+                            receipts.ensure_order(row) if kind=='order' else receipts.ensure_paid_receipt(row)
+                            save(chat)
+                            telegram.send_document(chat['telegram_id'], base64.b64decode(row[kind+'_pdf']), row[kind+'_number']+'.pdf', caption=('Orden de pago - no acredita un pago recibido.' if kind=='order' else 'Comprobante del pago confirmado para tu curso.'))
+                        keep = flow.get('preserve') or action in ['confirm_registration', 'registrations', 'human'] or (action or '').startswith('enroll:') or flow['handover'] or (chat.get('registration_draft') or {}).get('step') == 'confirm'
                         deliver(chat, flow['text'], flow['markup'], navigation=True, preserve=keep)
                         append(chat, 'assistant', flow['text'])
                         if collecting or chat.get('registration_draft'):
                             chat['messages'][-1]['private'] = True
                         chat['error'] = None
                     except Exception:
-                        chat.update(mode='human', error='No se pudo entregar la respuesta por Telegram. Requiere atención humana.')
+                        chat.update(mode=previous_mode if document_action else 'human', error='No se pudo entregar el documento o la respuesta por Telegram. Puedes reintentar la solicitud.')
                     save(chat)
                 return chat
             if handover:
@@ -346,6 +355,7 @@ def create_app(store=None):
             chat['summary'] = operator_summary.summarize(chat, current_catalog())
             for registration in chat.get('registrations', []):
                 registration['receipt_available'] = bool(registration.pop('receipt_pdf', None))
+                registration['order_available'] = bool(registration.pop('order_pdf', None))
         return jsonify(sorted(rows, key=lambda chat: chat['updated_at'], reverse=True))
 
     @app.get('/api/courses')
@@ -434,7 +444,7 @@ def create_app(store=None):
                     chat['error'] = 'Inscripción guardada; no se pudo entregar el aviso por Telegram.'
                     notified = False
                 save(chat)
-            return jsonify(registration=row, chat_id=chat_id, notified=notified), 201
+            return jsonify(registration={k:v for k,v in row.items() if k not in ['receipt_pdf','order_pdf']}, chat_id=chat_id, notified=notified), 201
 
     @app.get('/api/bot')
     def bot_info():
@@ -469,7 +479,7 @@ def create_app(store=None):
                     notified = False
                     chat['error'] = 'Comprobante guardado y pago confirmado. Falló el envío del PDF; puedes reintentarlo.'
                 save(chat)
-            return jsonify(registration={k:v for k,v in row.items() if k!='receipt_pdf'}, notified=notified)
+            return jsonify(registration={k:v for k,v in row.items() if k not in ['receipt_pdf','order_pdf']}, notified=notified)
 
     @app.get('/api/chats/<chat_id>/registrations/<registration_id>/receipt')
     def download_receipt(chat_id, registration_id):
@@ -477,7 +487,20 @@ def create_app(store=None):
         row = next((r for r in (chat or {}).get('registrations',[]) if r['id']==registration_id),None)
         if not row or not row.get('receipt_pdf'):
             return jsonify(error='Todavía no hay comprobante generado'),404
-        return Response(base64.b64decode(row['receipt_pdf']),mimetype='application/pdf',headers={'Content-Disposition':'attachment; filename="'+row['receipt_number']+'.pdf"'})
+        disposition = 'inline' if request.args.get('inline')=='1' else 'attachment'
+        return Response(base64.b64decode(row['receipt_pdf']),mimetype='application/pdf',headers={'Content-Disposition':disposition+'; filename="'+row['receipt_number']+'.pdf"'})
+
+    @app.get('/api/chats/<chat_id>/registrations/<registration_id>/order')
+    def download_order(chat_id, registration_id):
+        with chat_lock(chat_id):
+            chat = db.get(chat_id)
+            row = next((r for r in (chat or {}).get('registrations',[]) if r['id']==registration_id),None)
+            if not row:
+                return jsonify(error='Inscripción inexistente'),404
+            receipts.ensure_order(row)
+            save(chat)
+            disposition = 'inline' if request.args.get('inline')=='1' else 'attachment'
+            return Response(base64.b64decode(row['order_pdf']),mimetype='application/pdf',headers={'Content-Disposition':disposition+'; filename="'+row['order_number']+'.pdf"'})
 
     @app.post('/api/demo')
     def demo():
