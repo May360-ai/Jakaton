@@ -1,0 +1,65 @@
+# ==========================================
+# Entornos virtuales de Python
+# ==========================================
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# ==========================================
+# Bytecode y caché de Python
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ==========================================
+# Variables de entorno y credenciales
+# ==========================================
+.env
+.env.local
+*.secret
+
+# ==========================================
+# Datos generados por el scraper (Opcional)
+# Descomenta si no quieres subir las extracciones a Git
+# ==========================================
+# *.csv
+# *.json
+# cursos_uta.csv
+# cursos_uta.json
+# descargas/
+# logs/
+*.log
+
+# ==========================================
+# Archivos de configuración de editores / IDEs
+# ==========================================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ==========================================
+# Archivos del Sistema Operativo
+# ==========================================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
