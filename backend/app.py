@@ -11,6 +11,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from flask import Flask, Response, jsonify, request, send_from_directory, session
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from backend import agents, telegram, bot_flow, enrollment, operator_summary
 from backend.store import Store
@@ -34,6 +35,7 @@ def create_app(store=None):
     app.secret_key = os.getenv('SESSION_SECRET') or secrets.token_hex(32)
     app.config.update(MAX_CONTENT_LENGTH=131072, SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE='Strict')
     db = store or Store()
+    settings = db.settings()
     catalog = db.courses(COURSES)
     catalog_updated = time.monotonic()
     catalog_lock = threading.Lock()
@@ -89,6 +91,12 @@ def create_app(store=None):
                 # Taking over or a newer message invalidates in-flight inference.
                 if chat['mode'] != 'ai' or chat['revision'] != revision:
                     return
+                if result['handover'] and not advisor_available():
+                    result['handover'] = False
+                    result['reply'] += '\n\nAhora no hay un asesor disponible. Dejé tu solicitud registrada; puedes continuar con el bot o volver más tarde.'
+                    chat['waiting_for_advisor'] = True
+                elif result['handover']:
+                    chat['waiting_for_advisor'] = False
                 deliver(chat, result['reply'], markup)
                 append(chat, 'assistant', result['reply'])
                 chat.update(state=result['state'], summary=result['summary'], pending=False, error=None)
@@ -126,9 +134,22 @@ def create_app(store=None):
                 if action in ['bot_chat', 'enrollments'] or (action or '').startswith('register:') or text.strip().lower() in ['/bot', '/inscribirme']:
                     chat['mode'] = 'ai'
                 if chat['mode'] == 'human':
+                    if not advisor_available() and not chat.get('absence_notified'):
+                        chat.update(waiting_for_advisor=True, absence_notified=True)
+                        notice = 'Ahora no hay un asesor disponible. Tu consulta quedó registrada. Puedes volver al asistente con /bot o inscribirte con /inscribirme, sin esperar al operador.'
+                        try:
+                            deliver(chat, notice, bot_flow.home_keyboard())
+                            append(chat, 'assistant', notice)
+                        except Exception:
+                            chat['error'] = 'No se pudo entregar el aviso de ausencia por Telegram.'
                     save(chat)
                     return chat
                 flow = bot_flow.route(chat, text, current_catalog(), action)
+                if flow['handover'] and not advisor_available():
+                    chat['waiting_for_advisor'] = True
+                    flow.update(handover=False, infer=False, text='Ahora no hay un asesor disponible. Dejé tu solicitud de atención registrada. Puedes continuar consultando al bot o inscribirte sin esperar; el equipo verá tu conversación cuando vuelva.', markup=bot_flow.home_keyboard())
+                elif flow['handover']:
+                    chat['waiting_for_advisor'] = False
                 chat['state'] = flow['state']
                 chat['summary'] = f"Curso: {chat.get('selected_course', 'sin seleccionar')}. Perfil: {chat.get('profile', {})}. Última acción: {'Datos de inscripción recibidos' if collecting else text[:200]}"
                 chat['mode'] = 'human' if flow['handover'] else 'ai'
@@ -193,10 +214,64 @@ def create_app(store=None):
 
     @app.get('/api/session')
     def session_status():
-        return jsonify(authenticated=True)
+        return jsonify(authenticated=True, name=session.get('operator_name', 'Administrador'), admin=session.get('admin', True))
+
+    def advisor_available():
+        if 'advisor_sessions' in settings:
+            return any(p['expires_at'] > time.time() for p in settings['advisor_sessions'].values())
+        return bool(settings.get('advisor_available', True)) and settings.get('advisor_expires_at', time.time() + 1) > time.time()
+
+    @app.get('/api/settings')
+    def read_settings():
+        own = settings.get('advisor_sessions', {}).get(session.get('presence_id'), {})
+        return jsonify(advisor_available=advisor_available(), self_available=own.get('expires_at', 0) > time.time(), operator_name=session.get('operator_name', 'Administrador'), admin=session.get('admin', True))
+
+    @app.post('/api/presence')
+    def presence():
+        data = request.get_json(silent=True) or {}
+        with chat_lock('_settings'):
+            presence_id = session.setdefault('presence_id', secrets.token_hex(16))
+            settings['advisor_sessions'] = {key: value for key,value in settings.get('advisor_sessions', {}).items() if value['expires_at'] > time.time()}
+            if data.get('available'):
+                settings['advisor_sessions'][presence_id] = {'name': session.get('operator_name', 'Administrador'), 'expires_at': time.time() + 90}
+            else:
+                settings['advisor_sessions'].pop(presence_id, None)
+            db.save_settings(settings)
+        publish()
+        return jsonify(advisor_available=advisor_available())
+
+    @app.get('/api/operators')
+    @app.post('/api/operators')
+    def operators():
+        if not session.get('admin', False):
+            return jsonify(error='Solo el administrador puede gestionar operadores'), 403
+        if request.method == 'POST':
+            data = request.get_json(silent=True) or {}
+            username = str(data.get('username', '')).strip().lower()
+            password = str(data.get('password', ''))
+            name = str(data.get('name', '')).strip()
+            import re
+            if not re.fullmatch(r'[a-z0-9_.-]{3,40}', username) or len(password) < 10 or not 2 <= len(name) <= 80:
+                return jsonify(error='Usa usuario de 3–40 caracteres, nombre y contraseña de al menos 10 caracteres'), 400
+            with chat_lock('_settings'):
+                settings.setdefault('operators', {})[username] = {'name': name, 'hash': generate_password_hash(password)}
+                db.save_settings(settings)
+        return jsonify([{'username': username, 'name': account['name']} for username, account in settings.get('operators', {}).items()])
+
+    @app.get('/api/analytics')
+    def analytics():
+        rows = db.all()
+        registrations = [r for c in rows for r in c.get('registrations', [])]
+        real = [r for r in registrations if not r.get('is_demo')]
+        from decimal import Decimal
+        return jsonify(conversations=len(rows), registrations=len(registrations), pending=sum(r['status']=='pending_payment' for r in registrations), paid=sum(r['status']=='paid' for r in registrations), demo=sum(bool(r.get('is_demo')) for r in registrations), conversion=round(100 * sum(bool(c.get('registrations')) for c in rows) / len(rows), 1) if rows else 0, confirmed_usd=str(sum((Decimal(r['price']['amount']) for r in real if r['status']=='paid' and r.get('price', {}).get('currency')=='USD' and r['price'].get('amount') is not None), Decimal(0))), waiting=sum(bool(c.get('waiting_for_advisor')) for c in rows))
 
     @app.post('/api/logout')
     def logout():
+        presence_id = session.get('presence_id')
+        if presence_id and presence_id in settings.get('advisor_sessions', {}):
+            settings['advisor_sessions'].pop(presence_id, None)
+            db.save_settings(settings)
         session.clear()
         return jsonify(ok=True)
 
@@ -207,10 +282,16 @@ def create_app(store=None):
     @app.post('/api/login')
     def login():
         supplied = str((request.get_json(silent=True) or {}).get('password', ''))
-        if not hmac.compare_digest(supplied.encode(), os.getenv('DASHBOARD_PASSWORD', '').encode()):
+        username = str((request.get_json(silent=True) or {}).get('username', '')).strip().lower()
+        account = settings.get('operators', {}).get(username)
+        master = hmac.compare_digest(supplied.encode(), os.getenv('DASHBOARD_PASSWORD', '').encode()) and not username
+        if not master and not (account and check_password_hash(account['hash'], supplied)):
             time.sleep(0.3)
             return jsonify(error='Contraseña incorrecta'), 401
         session['operator'] = True
+        session['operator_name'] = 'Administrador' if master else account['name']
+        session['admin'] = master
+        session['presence_id'] = secrets.token_hex(16)
         return jsonify(ok=True)
 
     @app.get('/api/chats')
@@ -252,7 +333,7 @@ def create_app(store=None):
         if course_id is not None and not existing:
             return jsonify(error='Curso inexistente'), 404
         row = {k: data.get(k) for k in ['duracion', 'contenido', 'enlace']}
-        row.update(titulo=title, estado=data['estado'], is_demo=bool(data.get('is_demo')), details={**details, 'last_edited_by': 'dashboard_operator', 'last_edited_at': now()})
+        row.update(titulo=title, estado=data['estado'], is_demo=bool(data.get('is_demo')), details={**details, 'last_edited_by': session.get('operator_name', 'Administrador'), 'last_edited_at': now()})
         saved = db.save_course(row, course_id)
         with catalog_lock:
             catalog = db.courses(COURSES)
@@ -282,12 +363,29 @@ def create_app(store=None):
             for other in db.all():
                 if any(r['course_id'] == course['id'] and r['identification'] == chat['registration_draft']['identification'] for r in other.get('registrations', [])):
                     return jsonify(error='Esta cédula ya tiene una inscripción para el curso'), 409
+            if (course.get('details') or {}).get('precios'):
+                try:
+                    enrollment.choose_price(chat, course, data.get('price_index', ''))
+                except ValueError as error:
+                    return jsonify(error=str(error)), 400
             row = enrollment.confirm(chat, course)
             row['source'] = 'dashboard'
+            row['registered_by'] = session.get('operator_name', 'Administrador')
             append(chat, 'operator', f"Solicitud {row['id']} registrada para {course['titulo']}. Estado: pendiente de pago.")
             chat['state'] = 'caliente'
             save(chat)
-            return jsonify(registration=row, chat_id=chat_id), 201
+            notified = None
+            if chat.get('telegram_id'):
+                try:
+                    deliver(chat, enrollment.notice(row))
+                    row['registration_notice'] = 'sent'
+                    notified = True
+                except Exception:
+                    row['registration_notice'] = 'failed'
+                    chat['error'] = 'Inscripción guardada; no se pudo entregar el aviso por Telegram.'
+                    notified = False
+                save(chat)
+            return jsonify(registration=row, chat_id=chat_id, notified=notified), 201
 
     @app.get('/api/bot')
     def bot_info():
@@ -305,7 +403,8 @@ def create_app(store=None):
                 return jsonify(error='Inscripción inexistente'), 404
             if row['status'] == 'paid':
                 return jsonify(registration=row, notified=None)
-            row.update(status='paid', paid_at=now(), payment_reference=reference, confirmed_by='dashboard_operator')
+            row.update(status='paid', paid_at=now(), payment_reference=reference, confirmed_by=session.get('operator_name', 'Administrador'))
+            row.setdefault('audit', []).append({'action': 'payment_confirmed', 'at': row['paid_at'], 'actor': row['confirmed_by'], 'reference': reference, 'price': dict(row.get('price') or {})})
             save(chat)
             notice = f"Tu pago fue confirmado por el equipo para {row['course_title']}. Solicitud: {row['id']}. Conserva tu comprobante."
             notified = True
@@ -340,6 +439,9 @@ def create_app(store=None):
             if not chat:
                 return jsonify(error='Conversación inexistente'), 404
             chat.update(mode=value, revision=chat['revision'] + 1, pending=False)
+            if value == 'human':
+                chat['waiting_for_advisor'] = False
+                chat['absence_notified'] = False
             save(chat)
             return jsonify(chat)
 
@@ -353,6 +455,8 @@ def create_app(store=None):
             if not chat:
                 return jsonify(error='Conversación inexistente'), 404
             chat.update(mode='human', revision=chat['revision'] + 1, pending=False)
+            chat['waiting_for_advisor'] = False
+            chat['absence_notified'] = False
             save(chat)
             deliver(chat, text)
             append(chat, 'operator', text)

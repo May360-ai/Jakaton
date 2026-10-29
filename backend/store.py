@@ -51,8 +51,17 @@ class Store:
     def all(self):
         with self.lock:
             if self.remote:
-                return [row['data'] for row in self._request('GET', params={'select': 'data', 'order': 'updated_at.desc', 'limit': '200'})]
-            return [json.loads(row[0]) for row in self.db.execute('SELECT data FROM documents')]
+                rows = [row['data'] for row in self._request('GET', params={'select': 'data', 'order': 'updated_at.desc', 'limit': '200'})]
+            else:
+                rows = [json.loads(row[0]) for row in self.db.execute('SELECT data FROM documents')]
+            return [row for row in rows if not row.get('id', '').startswith('_system-')]
+
+    def settings(self):
+        return (self.get('_system-settings') or {}).get('settings', {})
+
+    def save_settings(self, settings):
+        from datetime import datetime, timezone
+        self.save({'id': '_system-settings', 'settings': settings, 'updated_at': datetime.now(timezone.utc).isoformat()})
 
     def get(self, chat_id):
         with self.lock:

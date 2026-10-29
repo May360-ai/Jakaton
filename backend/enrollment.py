@@ -1,11 +1,33 @@
 import re
 import secrets
+from decimal import Decimal, InvalidOperation
 from datetime import datetime, timezone
 
 
 def begin(chat, course):
     chat['registration_draft'] = {'course_id': course['id'], 'course_title': course['titulo'], 'step': 'name'}
     return 'Para registrar tu solicitud necesito tu nombre completo, cédula, teléfono y correo. Se usarán para gestionar la inscripción y el pago. No envíes comprobantes ni datos bancarios.\n\nEscribe tu nombre completo. Puedes cancelar con /cancelar.'
+
+
+def choose_price(chat, course, index):
+    draft = chat.get('registration_draft') or {}
+    prices = (course.get('details') or {}).get('precios') or []
+    try:
+        price = prices[int(index)]
+        amount = Decimal(price['valor'])
+        if int(index) < 0 or not amount.is_finite() or amount < 0:
+            raise ValueError()
+    except (ValueError, TypeError, IndexError, KeyError, InvalidOperation):
+        raise ValueError('Selecciona una tarifa válida del catálogo') from None
+    draft['price'] = {'category': price['perfil'], 'amount': format(amount, '.2f'), 'currency': price.get('moneda', 'USD')}
+    chat['registration_draft'] = draft
+    return draft['price']
+
+
+def notice(row):
+    price = row.get('price') or {}
+    amount = f"{price.get('amount')} {price.get('currency', 'USD')} · {price.get('category')}" if price.get('amount') is not None else 'Importe pendiente de confirmar por el centro'
+    return f"Solicitud {row['id']} registrada para {row['course_title']}.\nEstado: PENDIENTE DE PAGO.\nTarifa: {amount}\n" + ('DEMOSTRACIÓN: no realices pagos reales.' if row.get('is_demo') else 'Acércate al CTT-FISEI, Campus Huachi, para verificar cupo y realizar el pago. Conserva el comprobante; el equipo confirmará el pago en el sistema.')
 
 
 def collect(chat, text):
@@ -47,13 +69,16 @@ def confirm(chat, course):
     draft = chat.get('registration_draft') or {}
     if draft.get('step') != 'confirm' or draft.get('course_id') != course['id']:
         return None
+    if (course.get('details') or {}).get('precios') and not draft.get('price'):
+        return None
     rows = chat.setdefault('registrations', [])
-    existing = next((r for r in rows if r['course_id'] == course['id']), None)
+    existing = next((r for r in rows if r['course_id'] == course['id'] and r['identification'] == draft['identification']), None)
     if existing:
         chat.pop('registration_draft', None)
         return existing
     row = {k: draft[k] for k in ['course_id', 'course_title', 'name', 'identification', 'phone', 'email']}
     row.update(id=secrets.token_hex(8), status='pending_payment', created_at=datetime.now(timezone.utc).isoformat(), paid_at=None, is_demo=bool(course.get('is_demo')))
+    row['price'] = dict(draft.get('price') or {})
     rows.append(row)
     chat.pop('registration_draft', None)
     return row

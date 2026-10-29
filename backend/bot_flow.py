@@ -58,6 +58,18 @@ def route(chat, text, courses, action=None):
     state, handover = triage(text)
     result = {'text': '', 'markup': home_keyboard(), 'infer': False, 'handover': False, 'state': state}
     clean = normalized(text.strip())
+    if action and action.startswith('tariff:'):
+        draft = chat.get('registration_draft') or {}
+        course = next((c for c in courses if c['id'] == draft.get('course_id')), None)
+        try:
+            if not course or draft.get('step') != 'confirm':
+                raise ValueError('Inicia primero una inscripción')
+            price = enrollment.choose_price(chat, course, action.partition(':')[2])
+            result['text'] = f"Tarifa elegida: {price['category']} — {price['amount']} {price['currency']}.\nConfirma tu solicitud para guardarla pendiente de pago. La categoría será verificada por el centro."
+            result['markup'] = keyboard([button('✅ Confirmar solicitud', 'confirm_registration')], [button('Cancelar', 'cancel_registration')])
+        except ValueError as error:
+            result['text'] = str(error)
+        return result
     if action == 'cancel_registration' or clean == '/cancelar':
         chat.pop('registration_draft', None)
         result['text'] = 'Solicitud cancelada. Puedes volver a elegir un curso.'
@@ -65,15 +77,28 @@ def route(chat, text, courses, action=None):
     if chat.get('registration_draft') and action is None and not clean.startswith('/'):
         result['text'], ready = enrollment.collect(chat, text)
         result['markup'] = keyboard([button('✅ Confirmar solicitud', 'confirm_registration')], [button('Cancelar', 'cancel_registration')]) if ready else keyboard([button('Cancelar', 'cancel_registration')])
+        if ready:
+            course = next((c for c in courses if c['id'] == chat['registration_draft']['course_id']), None)
+            prices = ((course or {}).get('details') or {}).get('precios') or []
+            if prices:
+                result['text'] += '\n\nSelecciona la categoría que te corresponde. El centro verificará tu condición antes del pago.'
+                result['markup'] = keyboard(*[[button(f"{p['perfil'][:38]} · {p['valor']} {p.get('moneda', 'USD')}", 'tariff:' + str(i))] for i, p in enumerate(prices)], [button('Cancelar', 'cancel_registration')])
         return result
     if action == 'confirm_registration':
         draft = chat.get('registration_draft') or {}
         course = next((c for c in courses if c['id'] == draft.get('course_id')), None)
+        prices = ((course or {}).get('details') or {}).get('precios') or []
+        if prices and not draft.get('price'):
+            result['text'] = 'Antes de confirmar, selecciona tu categoría y tarifa.'
+            result['markup'] = keyboard(*[[button(f"{p['perfil'][:38]} · {p['valor']} {p.get('moneda', 'USD')}", 'tariff:' + str(i))] for i,p in enumerate(prices)])
+            return result
         row = enrollment.confirm(chat, course) if course else None
         result['text'] = (f"Solicitud {row['id']} registrada para {row['course_title']}.\nEstado: PENDIENTE DE PAGO.\nAcércate al CTT-FISEI, Campus Huachi, para verificar disponibilidad y realizar el pago de tu inscripción. El equipo confirmará el pago en el sistema. No realices pagos por este chat.\nTu cupo y la apertura de la edición deben ser confirmados por el centro." if row else 'Esta solicitud ya fue procesada o venció. Consulta Mis inscripciones.')
         result['state'] = 'caliente'
         if row and course.get('is_demo'):
             result['text'] = f"Solicitud de DEMOSTRACIÓN {row['id']} registrada para {row['course_title']}. Estado: PENDIENTE DE PAGO (simulado). No debes realizar ningún pago real por esta prueba."
+        if row:
+            result['text'] = enrollment.notice(row)
         return result
     if action == 'registrations':
         rows = chat.get('registrations', [])

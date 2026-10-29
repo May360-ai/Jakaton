@@ -97,3 +97,17 @@ Cada conversación ofrece Inscribir persona sin salir de la bandeja. Reutiliza l
 Los tres cursos iniciales de demostración están habilitados como ABIERTO y marcados con DEMO. Permiten probar el registro sin modificar los estados de los cursos oficiales. Una inscripción de demostración advierte que no corresponde realizar pagos reales.
 
 El catálogo de Telegram solo muestra cursos ABIERTO o PRÓXIMAMENTE con plazo de inscripción no vencido. Cerrados, archivados y por confirmar permanecen en el dashboard; los botones antiguos hacia esas fichas devuelven que ya no están disponibles. No se reutiliza el catálogo completo como alternativa cuando no hay cursos vigentes.
+
+## Tarifas, operadores y disponibilidad
+
+Cada inscripción nueva con tarifas publicadas exige seleccionar una categoría. Se guarda una copia de la tarifa, importe y moneda en la inscripción; cambios posteriores del curso no modifican ese importe. Una cédula puede inscribirse en varios cursos, con tarifas y pagos independientes. No se permite duplicar cédula y curso. Los registros antiguos sin tarifa se muestran por confirmar y no se incluyen como importe conocido en los totales.
+
+Al registrar desde la bandeja se avisa por Telegram si la conversación está vinculada al bot. Un fallo del envío no borra la inscripción y queda indicado en el hilo. Al confirmar pagos se guardan fecha, referencia, nombre del operador y la tarifa en un evento de auditoría. Solo se registra la verificación manual del comprobante; no se procesa dinero electrónicamente.
+
+Operación y métricas muestra conversión de conversaciones a solicitudes, pendientes, pagadas, demostraciones, cola de atención y pagos reales confirmados en USD. Los importes DEMO se excluyen de la recaudación real.
+
+La cabecera permite marcarse disponible o ausente. Cada sesión disponible renueva su presencia cada 30 segundos; vence en 90 segundos si se cierra el panel y se retira al cerrar sesión. Las sesiones de otros operadores siguen disponibles. Si no hay nadie, el bot informa que registró la solicitud de asesor y permite continuar con botones o IA. Al tomar el control o responder, la conversación deja de figurar en la cola.
+
+El administrador entra con usuario vacío y la contraseña del .env. Desde Operación y métricas puede crear accesos individuales con nombre, usuario y contraseña. Las contraseñas se guardan con hash scrypt en configuración privada de Supabase; nunca se devuelven por API. Los operadores pueden atender y confirmar pagos, pero no gestionar accesos de otros operadores. La configuración se guarda en un documento interno que no aparece en la bandeja.
+
+Por decisión del equipo, la demo continúa en local/red local y solo admite texto: audio y despliegue público quedan fuera del alcance actual. El Dockerfile se conserva como preparación para un despliegue posterior.
