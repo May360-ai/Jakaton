@@ -29,76 +29,62 @@ def scrapear_cursos():
   soup = BeautifulSoup(response.text, "html.parser")
   cursos = []
 
-  # Buscamos las tarjetas de cursos.
-  # Usualmente están contenidas en elementos tipo col, card o bloques con clases específicas.
-  # Buscaremos los contenedores que tengan información de horas o estado:
-  cards = soup.find_all(
-      lambda tag: tag.name in ["div", "article"]
+  # La estructura real de cada tarjeta es:
+  #   div.rounded > a[img aria-label="TITULO"] + div.bg-secondary > div[ABIERTO/HORAS] + a.h5[titulo]
+  # Buscamos los divs internos con estado y horas (el nivel más interno), luego subimos al padre.
+  inner_cards = soup.find_all(
+      lambda tag: tag.name == "div"
       and (
           "ABIERTO" in tag.get_text() or "CERRADO" in tag.get_text()
-      )  # Filtra los contenedores de curso
-      and ("HORAS" in tag.get_text())
+      )
+      and "HORAS" in tag.get_text()
   )
 
-  # Para evitar tomar contenedores padres repetidos, filtramos los elementos más internos
-  tarjetas_unicas = []
-  for card in cards:
-    # Verificamos si este elemento no contiene a otro que ya cumpla la condición
+  # Filtramos los elementos más internos (sin hijos que también cumplan la condición)
+  contenedores = []
+  for card in inner_cards:
     sub_cards = card.find_all(
         lambda t: t != card
         and ("ABIERTO" in t.get_text() or "CERRADO" in t.get_text())
         and "HORAS" in t.get_text()
     )
     if not sub_cards:
-      tarjetas_unicas.append(card)
+      # Subimos al contenedor padre real (div.rounded que tiene imagen + datos)
+      padre = card.parent if card.parent else card
+      contenedores.append(padre)
 
-  print(f"Se encontraron {len(tarjetas_unicas)} tarjetas detectadas.\n")
+  print(f"Se encontraron {len(contenedores)} tarjetas detectadas.\n")
 
-  for i, card in enumerate(tarjetas_unicas, 1):
-    texto_completo = [
-        linea.strip()
-        for linea in card.get_text(separator="\n").split("\n")
-        if linea.strip()
-    ]
+  for i, contenedor in enumerate(contenedores, 1):
+    # --- Título: buscar el <a class="h5"> ---
+    titulo_elem = contenedor.find("a", class_="h5")
+    if titulo_elem:
+      titulo = titulo_elem.get_text(strip=True)
+    else:
+      # Fallback: aria-label del enlace de la imagen
+      img_link = contenedor.find("a", attrs={"aria-label": True})
+      titulo = img_link["aria-label"] if img_link else "S/N"
 
-    # Estado (ABIERTO / CERRADO)
-    estado = (
-        "ABIERTO"
-        if "ABIERTO" in texto_completo
-        else ("CERRADO" if "CERRADO" in texto_completo else "NO DEFINIDO")
-    )
+    # --- Estado (ABIERTO / CERRADO) ---
+    texto_completo = contenedor.get_text()
+    if "ABIERTO" in texto_completo:
+      estado = "ABIERTO"
+    elif "CERRADO" in texto_completo:
+      estado = "CERRADO"
+    else:
+      estado = "NO DEFINIDO"
 
-    # Duración en horas
-    horas = next((t for t in texto_completo if "HORA" in t.upper()), "N/D")
+    # --- Duración en horas ---
+    lineas = [l.strip() for l in texto_completo.split("\n") if l.strip()]
+    horas = next((t for t in lineas if "HORA" in t.upper()), "N/D")
 
-    # Enlaces de inscripción si existen
-    link_elem = card.find("a", href=True)
-    enlace = (
-        link_elem["href"]
-        if link_elem
-        else "https://ctt-talleresfisei.uta.edu.ec/"
-    )
+    # --- Enlace del curso ---
+    link_elem = contenedor.find("a", class_="h5", href=True)
+    if not link_elem:
+      link_elem = contenedor.find("a", href=True)
+    enlace = link_elem["href"] if link_elem else "https://ctt-talleresfisei.uta.edu.ec/"
     if enlace and not enlace.startswith("http"):
       enlace = f"https://ctt-talleresfisei.uta.edu.ec/{enlace.lstrip('/')}"
-
-    # Limpieza de títulos descartando metadatos conocidos
-    lineas_titulo = [
-        t
-        for t in texto_completo
-        if t
-        not in [
-            "ABIERTO",
-            "CERRADO",
-            horas,
-            "INSCRIBIRME",
-            "CURSOS",
-            "Cursos Disponibles",
-        ]
-        and not t.startswith("CURSO ")
-    ]
-
-    # Nombre principal
-    titulo = " - ".join(dict.fromkeys(lineas_titulo)) if lineas_titulo else "S/N"
 
     curso_data = {
         "id": i,
@@ -128,7 +114,4 @@ if __name__ == "__main__":
       dict_writer.writeheader()
       dict_writer.writerows(datos)
 
-    print(
-        "\n✅ Scraping completado con éxito. Archivos guardados como"
-        " 'cursos_uta.csv' y 'cursos_uta.json'."
-    )
+    print("\nScraping completado con exito. Archivos guardados como 'cursos_uta.csv' y 'cursos_uta.json'.")
