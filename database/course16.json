@@ -1,0 +1,29 @@
+{
+  "titulo": "CCNA: Introducción a las redes – Preparación Cisco Certified Network Associate",
+  "estado": "INSCRIPCIONES FINALIZADAS",
+  "duracion": "70 horas",
+  "contenido": "Fundamentos teóricos y prácticos de redes de datos: modelos OSI y TCP/IP, Ethernet, configuración básica de switches y routers, direccionamiento IPv4 e IPv6, protocolos de comunicación, seguridad y construcción de una red pequeña.",
+  "enlace": "https://ctt-talleresfisei.uta.edu.ec/curso16.php",
+  "is_demo": false,
+  "details": {
+    "source_url": "https://ctt-talleresfisei.uta.edu.ec/curso16.php",
+    "source_checked_on": "2026-10-29",
+    "registration_start": "2026-10-01",
+    "registration_end": "2026-10-15",
+    "course_start": "2026-10-16",
+    "course_end": "2026-12-05",
+    "registration_url": "https://docs.google.com/forms/d/e/1FAIpQLSeWhh69h-nGZYQvWkFIyR1riMYBOc61CC7YmWL49XBo64I3zA/viewform",
+    "modalidad": "Híbrida",
+    "lugar": "Talleres Tecnológicos FISEI, Campus Huachi, Ambato; sesiones virtuales según cronograma.",
+    "horario": "Sesiones virtuales los viernes de 19:00 a 21:00 y sesiones presenciales los sábados de 08:00 a 13:00, más trabajo autónomo, según la planificación.",
+    "cupo": "Mínimo 5, máximo 20. La ficha no informa disponibilidad actual de plazas.",
+    "requisitos": "Conocimientos previos: ninguno.",
+    "materiales": ["Computador personal", "Laboratorio de redes", "Plataforma Cisco NetAcad"],
+    "certificado": "Certificado digital de aprobación con validación QR. El certificado de este curso de preparación no significa obtener automáticamente la certificación internacional externa.",
+    "instructores": ["Ing. Livio Danilo Miniguano, Mg.", "Ing. Daniel Maldonado Ruiz, Ph.D."],
+    "objetivos": ["Comprender los modelos y protocolos de comunicación de redes.", "Configurar y verificar dispositivos de red como switches y routers.", "Aplicar direccionamiento IPv4 e IPv6 y conceptos de seguridad en una red pequeña."],
+    "modulos": ["Networking Today", "Basic Switch and End Device Configuration", "Protocols and Models", "Physical Layer", "Number Systems", "Data Link Layer", "Ethernet Switching", "Network Layer", "Address Resolution", "Basic Router Configuration", "IPv4 Addressing", "IPv6 Addressing", "ICMP", "Transport Layer", "Application Layer", "Network Security Fundamentals", "Build a Small Network"],
+    "precios": [{"perfil": "Estudiantes UTA (hasta último período)", "valor": "120.00", "moneda": "USD"}, {"perfil": "Graduados, docentes y personal administrativo UTA", "valor": "150.00", "moneda": "USD"}, {"perfil": "Público en general", "valor": "180.00", "moneda": "USD"}],
+    "contacto": "ctt.fisei@uta.edu.ec · talleresfisei@uta.edu.ec"
+  }
+}

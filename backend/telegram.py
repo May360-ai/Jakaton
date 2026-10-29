@@ -23,8 +23,39 @@ def call(method, payload, timeout=40):
         raise RuntimeError('No se pudo conectar con Telegram') from None
 
 
-def send(chat_id, text):
-    return call('sendMessage', {'chat_id': chat_id, 'text': text[:4000]})
+def send(chat_id, text, reply_markup=None):
+    payload = {'chat_id': chat_id, 'text': text[:4000]}
+    if reply_markup:
+        payload['reply_markup'] = reply_markup
+    return call('sendMessage', payload)
+
+
+def configure():
+    call('setMyCommands', {'commands': [
+        {'command': 'start', 'description': 'Abrir el menú principal'},
+        {'command': 'cursos', 'description': 'Explorar cursos y contenido'},
+        {'command': 'asesor', 'description': 'Solicitar atención humana'},
+        {'command': 'ayuda', 'description': 'Preguntas frecuentes'},
+    ]})
+    call('setChatMenuButton', {'menu_button': {'type': 'commands'}})
+
+
+def dispatch(update, receive):
+    callback = update.get('callback_query')
+    if callback:
+        message = callback.get('message', {})
+        if message.get('chat', {}).get('type') != 'private' or callback.get('from', {}).get('id') != message['chat']['id']:
+            return
+        try:
+            call('answerCallbackQuery', {'callback_query_id': callback['id']}, timeout=8)
+        except Exception:
+            log.warning('No se pudo confirmar un botón de Telegram.')
+        receive('tg-' + str(message['chat']['id']), callback['from'].get('first_name', 'Telegram'), '', message['chat']['id'], str(update['update_id']), action=callback.get('data', '')[:64])
+        return
+    message = update.get('message', {})
+    if message.get('chat', {}).get('type') == 'private':
+        text = message.get('text') or '/ayuda'
+        receive('tg-' + str(message['chat']['id']), message.get('from', {}).get('first_name', 'Telegram'), text, message['chat']['id'], str(update['update_id']))
 
 
 def start_polling(receive):
@@ -32,11 +63,9 @@ def start_polling(receive):
         offset = 0
         while True:
             try:
-                updates = call('getUpdates', {'offset': offset, 'timeout': 25, 'allowed_updates': ['message']})
+                updates = call('getUpdates', {'offset': offset, 'timeout': 25, 'allowed_updates': ['message', 'callback_query']})
                 for update in updates:
-                    message = update.get('message', {})
-                    if message.get('text') and message.get('chat', {}).get('type') == 'private':
-                        receive('tg-' + str(message['chat']['id']), message.get('from', {}).get('first_name', 'Telegram'), message['text'], message['chat']['id'], str(update['update_id']))
+                    dispatch(update, receive)
                     offset = update['update_id'] + 1
             except Exception:
                 log.warning('Recepción de Telegram interrumpida; se reintentará en 5 segundos.')
