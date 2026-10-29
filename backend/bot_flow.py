@@ -102,6 +102,13 @@ def route(chat, text, courses, action=None):
                    'schedule': 'Los horarios y la modalidad deben estar confirmados en el catálogo. Si no están publicados, puedes pedirlos al asesor.'}
         result['text'] = answers.get(arg, 'Elige una opción del menú.')
     elif root in ['course', 'content', 'schedule', 'enroll', 'requirements', 'explain', 'ask']:
+        content_page = 0
+        if root == 'content' and ':' in arg:
+            arg, page = arg.split(':', 1)
+            try:
+                content_page = max(0, int(page))
+            except ValueError:
+                content_page = 0
         course = next((c for c in courses if str(c['id']) == arg), None)
         if not course:
             result['text'] = 'Este curso ya no está disponible en el catálogo. Vuelve a consultar los cursos.'
@@ -116,7 +123,23 @@ def route(chat, text, courses, action=None):
             result['text'] = f"{title}\n\nDuración: {course.get('duracion') or 'Por confirmar'}\nEstado: {course.get('estado') or 'Por confirmar'}\n\n¿Qué quieres consultar?" + note
         elif root == 'content':
             modules = details.get('modulos', [])
-            result['text'] = title + '\n\n' + str(course.get('contenido') or 'El contenido detallado aún no está publicado. Un asesor puede confirmarlo.')[:1600] + ('\n\nMódulos:\n' + '\n'.join(f'{i}. {m}' for i, m in enumerate(modules, 1)) if modules else '') + note
+            full = str(course.get('contenido') or 'El contenido detallado aún no está publicado. Un asesor puede confirmarlo.') + ('\n\nContenido:\n' + '\n'.join(f'{i}. {m}' for i, m in enumerate(modules, 1)) if modules else '')
+            pages = []
+            while full:
+                cut = full.rfind('\n', 0, 2900) if len(full) > 2900 else len(full)
+                if cut <= 0:
+                    cut = min(2900, len(full))
+                pages.append(full[:cut])
+                full = full[cut:].lstrip('\n')
+            content_page = min(content_page, len(pages) - 1)
+            result['text'] = title + f'\n\nContenido ({content_page + 1}/{len(pages)})\n\n' + pages[content_page] + note
+            nav = []
+            if content_page:
+                nav.append(button('← Contenido anterior', f'content:{arg}:{content_page - 1}'))
+            if content_page + 1 < len(pages):
+                nav.append(button('Más contenido →', f'content:{arg}:{content_page + 1}'))
+            if nav:
+                result['markup']['inline_keyboard'].insert(0, nav)
         elif root == 'schedule':
             result['text'] = f"{title}\n\nDuración: {course.get('duracion') or 'Por confirmar'}\nEstado: {course.get('estado') or 'Por confirmar'}\nModalidad: {details.get('modalidad', 'Por confirmar')}\nFechas del curso: {details.get('course_start', 'Por confirmar')} al {details.get('course_end', 'Por confirmar')}\n\nHorario: {details.get('horario', 'Consultar con el asesor')}\n\nLugar: {details.get('lugar', 'Por confirmar')}" + note
         elif root == 'requirements':

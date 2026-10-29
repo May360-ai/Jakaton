@@ -2,6 +2,10 @@
 
 ## Bot con botones y catálogo real
 
+El catálogo completo contiene 18 fichas reales enlazadas desde `course.php` e `index.php`. Para actualizarlo: `python -m database.import_catalog`. El importador conserva IDs, no duplica los enlaces existentes y guarda la extracción en `database/catalog.json`. Si el servidor público de la universidad continúa entregando una cadena TLS incompleta, se puede usar `--allow-unverified-source-tls` únicamente para esa fuente; la conexión de Supabase siempre verifica TLS. Los datos ausentes quedan por confirmar. Las fechas publicadas determinan si la inscripción está finalizada, es próxima o está abierta; el enlace a un formulario no se interpreta por sí solo como inscripción vigente.
+
+El bot pagina tanto el listado de cursos como los contenidos largos para respetar el límite de Telegram. Las dudas enviadas a Gemini reciben solo la ficha del curso seleccionado, evitando enviar el catálogo completo.
+
 El flujo de Telegram usa botones para consultar cursos, contenido, horarios, tarifas, requisitos y certificado directamente desde Supabase, sin llamadas al modelo. La IA solo se activa al pulsar **Tengo una duda (IA)** y enviar una pregunta; el resto del texto libre muestra el menú. `/start`, `/cursos`, `/asesor` y `/ayuda` están registrados en Telegram. El traspaso a un asesor pausa tanto los menús automáticos como la IA hasta que un operador reanude la atención desde el panel.
 
 Se cargó la ficha real del curso CCNA de `curso16.php`, revisada el 29 de octubre de 2026, con 17 módulos y tarifas de 120, 150 y 180 USD según el público. Sus inscripciones terminaron el 15 de octubre de 2026, por lo que el bot no ofrece matrícula abierta. La información revisada está en `database/course16.json`; para volver a cargarla, ejecuta `python -m database.load_course` tras aplicar `database/002_course_details.sql`. El importador conserva el ID cuando el enlace ya existe. El catálogo se refresca cada 15 segundos sin reiniciar. Los cursos de demostración quedan ocultos en Telegram cuando existe un curso real válido.

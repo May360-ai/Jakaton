@@ -80,6 +80,8 @@ def create_app(store=None):
             if prompt:
                 snapshot['messages'].append({'role': 'user', 'text': prompt})
             reference = bot_flow.available(current_catalog()) if snapshot.get('telegram_id') else current_catalog()
+            if snapshot.get('telegram_id') and snapshot.get('selected_course'):
+                reference = [course for course in reference if course['id'] == snapshot['selected_course']]
             result = agents.answer(snapshot, reference)
             with chat_lock(chat_id):
                 chat = db.get(chat_id)
