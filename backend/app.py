@@ -73,9 +73,22 @@ def create_app(store=None):
     def append(chat, role, text):
         chat['messages'].append({'id': secrets.token_hex(6), 'role': role, 'text': text, 'at': now()})
 
-    def deliver(chat, text, markup=None):
+    def deliver(chat, text, markup=None, navigation=False, preserve=False):
         if chat.get('telegram_id'):
-            telegram.send(chat['telegram_id'], text, reply_markup=markup)
+            sent = telegram.send(chat['telegram_id'], text, reply_markup=markup)
+            if navigation:
+                remaining = []
+                # Only IDs explicitly recorded as disposable navigation are eligible.
+                # Delivery must succeed before retiring the previous screen.
+                for message_id in chat.get('telegram_navigation_ids', []):
+                    try:
+                        telegram.delete_message(chat['telegram_id'], message_id)
+                    except Exception:
+                        remaining.append(message_id)
+                        app.logger.info('No se pudo retirar un menú anterior de Telegram.')
+                if not preserve and isinstance(sent, dict) and isinstance(sent.get('message_id'), int):
+                    remaining.append(sent['message_id'])
+                chat['telegram_navigation_ids'] = remaining[-10:]
 
     def release_if_idle(chat):
         if chat.get('mode') != 'human':
@@ -127,7 +140,7 @@ def create_app(store=None):
                     chat['waiting_for_advisor'] = True
                 elif result['handover']:
                     chat['waiting_for_advisor'] = False
-                deliver(chat, result['reply'], markup)
+                deliver(chat, result['reply'], markup, navigation=True, preserve=result['handover'])
                 append(chat, 'assistant', result['reply'])
                 chat.update(state=result['state'], summary=result['summary'], pending=False, error=None)
                 if result['handover']:
@@ -190,7 +203,8 @@ def create_app(store=None):
                     threading.Thread(target=infer, args=(chat_id, chat['revision'], flow.get('prompt'), flow['markup'] or bot_flow.home_keyboard()), daemon=True).start()
                 else:
                     try:
-                        deliver(chat, flow['text'], flow['markup'])
+                        keep = action in ['confirm_registration', 'registrations', 'human'] or (action or '').startswith('enroll:') or flow['handover'] or (chat.get('registration_draft') or {}).get('step') == 'confirm'
+                        deliver(chat, flow['text'], flow['markup'], navigation=True, preserve=keep)
                         append(chat, 'assistant', flow['text'])
                         if collecting or chat.get('registration_draft'):
                             chat['messages'][-1]['private'] = True

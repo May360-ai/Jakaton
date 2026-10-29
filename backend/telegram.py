@@ -30,6 +30,10 @@ def send(chat_id, text, reply_markup=None):
     return call('sendMessage', payload)
 
 
+def delete_message(chat_id, message_id):
+    return call('deleteMessage', {'chat_id': chat_id, 'message_id': message_id}, timeout=8)
+
+
 def send_document(chat_id, data, filename):
     try:
         response = requests.post(f"https://api.telegram.org/bot{os.getenv('TELEGRAM_BOT_TOKEN')}/sendDocument", data={'chat_id': str(chat_id), 'caption': 'Tu comprobante de registro de pago. Conserva este PDF.'}, files={'document': (filename, data, 'application/pdf')}, timeout=(10,45))
